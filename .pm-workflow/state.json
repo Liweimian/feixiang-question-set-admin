@@ -1,6 +1,6 @@
 {
   "projectName": "飞象题单管理后台",
-  "currentStage": 0,
+  "currentStage": 1,
   "stages": {
     "0": {
       "name": "需求澄清",
@@ -10,7 +10,14 @@
     },
     "1": {
       "name": "Demo 创作",
-      "status": "pending"
+      "status": "completed",
+      "completedAt": "2026-10-21T19:35:00+08:00",
+      "outputs": [
+        "src/",
+        "README.md",
+        "AGENT-HANDOFF.md",
+        "checkpoint.md"
+      ]
     },
     "2": {
       "name": "产品稿文字",
@@ -21,7 +28,13 @@
       "status": "pending"
     }
   },
-  "gitCommits": [],
+  "gitCommits": [
+    {
+      "stage": 0,
+      "hash": "738ea48",
+      "message": "Stage 0: 需求澄清完成"
+    }
+  ],
   "createdAt": "2026-10-21T18:30:00+08:00",
-  "updatedAt": "2026-10-21T18:30:00+08:00"
+  "updatedAt": "2026-10-21T19:35:00+08:00"
 }
