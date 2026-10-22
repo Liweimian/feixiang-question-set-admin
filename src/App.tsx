@@ -13,7 +13,9 @@ export function App() {
         <Route path="/assets" element={<QuestionSetListPage />} />
         <Route path="/assets/:id" element={<QuestionSetDetailPage />} />
         <Route path="/jobs" element={<GenerationJobsPage />} />
-        <Route path="/bindings" element={<CatalogBindingPage />} />
+        <Route path="/catalogs" element={<CatalogBindingPage mode="textbook" />} />
+        <Route path="/topic-tree" element={<CatalogBindingPage mode="topic" />} />
+        <Route path="/bindings" element={<Navigate to="/catalogs" replace />} />
         <Route path="/rules" element={<GenerationRulesPage />} />
         <Route path="*" element={<Navigate to="/assets" replace />} />
       </Routes>

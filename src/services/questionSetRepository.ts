@@ -18,12 +18,22 @@ export const questionSetRepository: QuestionSetRepository = {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(keyword))
       const filters = query.filters
+      const questionId = filters.questionId ?? ''
       return keywordMatched
+        && (!filters.id || item.id.toLowerCase().includes(filters.id.toLowerCase()))
+        && (!filters.title || item.title.toLowerCase().includes(filters.title.toLowerCase()))
+        && (!questionId || item.questionIds?.some((id) => id.includes(questionId)))
         && (!filters.type || item.type === filters.type)
+        && (!filters.phase || item.scope.phase === filters.phase)
         && (!filters.contentStatus || item.contentStatus === filters.contentStatus)
         && (!filters.syncStatus || item.syncStatus === filters.syncStatus)
         && (!filters.bindingStatus || item.bindingStatus === filters.bindingStatus)
         && (!filters.subject || item.scope.subject === filters.subject)
+        && (!filters.grade || item.scope.grade === filters.grade)
+        && (!filters.textbook || item.scope.textbook.includes(filters.textbook))
+        && (!filters.method || item.method === filters.method)
+        && (!filters.workbookId || item.source.workbookId?.includes(filters.workbookId))
+        && (!filters.owner || item.owner === filters.owner)
     })
     const start = (query.page - 1) * query.pageSize
     return {

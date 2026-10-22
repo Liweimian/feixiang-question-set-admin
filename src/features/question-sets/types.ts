@@ -39,6 +39,7 @@ export interface QuestionSet {
   method: ProductionMethod
   scope: TeachingScope
   source: SourceSummary
+  questionIds?: string[]
   questionCount: number
   duration: number
   difficulty: string
@@ -111,9 +112,18 @@ export interface CatalogBinding {
 }
 
 export interface QuestionSetFilters {
+  id?: string
+  title?: string
+  questionId?: string
   type?: QuestionSetType
+  phase?: string
   contentStatus?: ContentStatus
   syncStatus?: SyncStatus
   bindingStatus?: BindingStatus
   subject?: string
+  grade?: string
+  textbook?: string
+  method?: ProductionMethod
+  workbookId?: string
+  owner?: string
 }

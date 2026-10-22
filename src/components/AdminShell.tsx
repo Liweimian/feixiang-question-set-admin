@@ -1,24 +1,39 @@
 import type { PropsWithChildren } from 'react'
-import { useMemo } from 'react'
-import { MetisButton } from '@yuanfudao/metis-web-component'
+import { useEffect, useMemo, useRef } from 'react'
+import { MetisButton, MetisMessage } from '@yuanfudao/metis-web-component'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
-const navItems = [
+const navItems: Array<{ path?: string; label: string }> = [
+  { label: '题目' },
+  { label: '标签管理' },
+  { label: '知识点' },
+  { path: '/catalogs', label: '教材目录' },
+  { path: '/topic-tree', label: '专题树' },
+  { label: '主题' },
+  { label: '策略' },
+  { label: '技能' },
+  { label: '词汇' },
+  { label: '核心素养' },
+  { label: '业务标签' },
+  { label: '练习册' },
+  { label: '试卷' },
   { path: '/assets', label: '题单库' },
-  { path: '/jobs', label: '生成任务' },
-  { path: '/bindings', label: '目录关联' },
-  { path: '/rules', label: '生成规则' },
+  { label: '作文素材' },
+  { label: '书城' },
 ]
 
 export function AdminShell({ children }: PropsWithChildren) {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const activeButtonRef = useRef<HTMLButtonElement>(null)
+  const navScrollRef = useRef<HTMLDivElement>(null)
   const reviewMode = searchParams.get('mode') === 'review'
-  const activePath = useMemo(
-    () => navItems.find((item) => location.pathname.startsWith(item.path))?.path ?? '/assets',
-    [location.pathname],
-  )
+  const activePath = useMemo(() => {
+    if (location.pathname.startsWith('/catalogs')) return '/catalogs'
+    if (location.pathname.startsWith('/topic-tree')) return '/topic-tree'
+    return '/assets'
+  }, [location.pathname])
 
   const toggleMode = () => {
     const next = new URLSearchParams(searchParams)
@@ -26,6 +41,13 @@ export function AdminShell({ children }: PropsWithChildren) {
     else next.set('mode', 'review')
     navigate(`${location.pathname}${next.size ? `?${next.toString()}` : ''}`)
   }
+
+  useEffect(() => {
+    const container = navScrollRef.current
+    const activeButton = activeButtonRef.current
+    if (!container || !activeButton) return
+    container.scrollTop = Math.max(0, activeButton.offsetTop - container.offsetTop - container.clientHeight / 2)
+  }, [activePath])
 
   return (
     <div className={`admin-app ${reviewMode ? 'is-review' : ''}`}>
@@ -36,33 +58,33 @@ export function AdminShell({ children }: PropsWithChildren) {
           <span className="environment-pill">原型</span>
         </div>
         <nav className="global-nav" aria-label="平台主导航">
-          <span>内容库</span>
-          <span className="active">内容生产</span>
+          <span className="active">内容库</span>
+          <span>内容生产</span>
           <span>任务管理</span>
+          <span>培训考试</span>
           <span>资源库管理</span>
         </nav>
         <div className="account-meta">内容运营 · 王晓慧</div>
       </header>
 
       <div className="workspace-shell">
-        <aside className="module-nav" aria-label="题单管理导航">
+        <aside className="module-nav" aria-label="内容库导航">
           <div className="module-nav-title">
-            <span>内容生产</span>
-            <strong>题单管理</strong>
+            <span>资源库管理</span>
+            <strong>内容库</strong>
           </div>
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              type="button"
-              className={activePath === item.path ? 'active' : ''}
-              onClick={() => navigate(item.path)}
-            >
-              <span>{item.label}</span>
-            </button>
-          ))}
-          <div className="nav-guidance">
-            <strong>统一题单资产</strong>
-            <p>来源、内容版本和前台目录相互解耦。</p>
+          <div className="module-nav-scroll" ref={navScrollRef}>
+            {navItems.map((item) => (
+              <button
+                key={item.label}
+                ref={activePath === item.path ? activeButtonRef : undefined}
+                type="button"
+                className={activePath === item.path ? 'active' : ''}
+                onClick={() => item.path ? navigate(item.path) : MetisMessage.info(`${item.label}为现有内容库页面，本原型不展开`)}
+              >
+                <span>{item.label}</span>
+              </button>
+            ))}
           </div>
         </aside>
 

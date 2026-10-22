@@ -48,7 +48,7 @@ export function GenerationRulesPage() {
   return (
     <div className="page-container rules-page">
       <header className="page-heading" data-sec="1">
-        <div><span className="breadcrumb">内容生产 / 题单管理</span><h1>生成规则</h1><p>规则需版本化、可试跑、可回溯；章节业务分类以显式字段为准。</p></div>
+        <div><span className="breadcrumb">内容库 / 题单库 / 生成规则</span><h1>题单生成规则</h1><p>规则需版本化、可试跑、可回溯；章节业务分类以显式字段为准。</p></div>
         <div className="heading-actions"><MetisButton onClick={() => setDryRunVisible(true)}>试跑规则</MetisButton><MetisButton type="primary" onClick={() => MetisMessage.info('创建规则草稿 v1.4')}>新建规则版本</MetisButton></div>
       </header>
 

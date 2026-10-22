@@ -68,7 +68,7 @@ export function GenerationJobsPage() {
   return (
     <div className="page-container jobs-page">
       <header className="page-heading" data-sec="1">
-        <div><span className="breadcrumb">内容生产 / 题单管理</span><h1>生成任务</h1><p>每次自动或人工生成都先预检、可追踪、可幂等重试。</p></div>
+        <div><span className="breadcrumb">内容库 / 题单库 / 生成记录</span><h1>题单生成记录</h1><p>每次自动或人工生成都先预检、可追踪、可幂等重试。</p></div>
         <MetisButton type="primary" data-track="/click/generationJobs/create | 创建人工生成任务 | 无" onClick={() => setDialogOpen(true)}>人工批量生成</MetisButton>
       </header>
 
