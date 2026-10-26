@@ -123,7 +123,7 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
     },
   ]
 
-  const relationItems = [
+  const textbookRelationItems = [
     { key: 'knowledge', label: `关联知识点（${resourcesByTab.knowledge.length}）` },
     { key: 'paper', label: `关联试卷（${resourcesByTab.paper.length}）` },
     { key: 'questionSet', label: `关联题单（${bindings.length}）` },
@@ -157,11 +157,11 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
 
         <div className="catalog-relation-content">
           <div className="directory-node-heading">
-            <div><span>{isTextbook ? '[章节]' : '[专题节点]'}</span><h2>{currentNode.label}</h2><p>节点 ID：{currentNode.id} · 当前共 {currentNode.relationCount} 项关联</p></div>
+            <div><span>{isTextbook ? '[章节]' : '[专题节点]'}</span><h2>{currentNode.label}</h2><p>节点 ID：{currentNode.id} · {isTextbook ? `当前共 ${currentNode.relationCount} 项关联` : `当前已关联 ${bindings.length} 个题单`}</p></div>
             <div><MetisButton onClick={() => MetisMessage.info('编辑当前节点')}>编辑节点</MetisButton><MetisButton type="primary" onClick={() => MetisMessage.info(`打开关联${relationLabel}选择器`)}>关联{relationLabel}</MetisButton></div>
           </div>
 
-          <MetisTabs activeKey={relationTab} items={relationItems} onChange={(key) => setRelationTab(key as RelationTab)} />
+          {isTextbook ? <MetisTabs activeKey={relationTab} items={textbookRelationItems} onChange={(key) => setRelationTab(key as RelationTab)} /> : <div className="topic-relation-heading"><strong>关联题单</strong><span>专题节点只关联题单，不直接关联知识点、试卷或题目</span></div>}
 
           {relationTab === 'questionSet' ? <div className="relation-panel">
             <MetisAlert type="info" showIcon message="前台可见 = 有效目录关联 + 已上线题单版本" description={isTextbook ? '教材目录用于同步练习投放；题单生成后仍需在此确认关联关系。' : '专题树只负责专题题单的分类与投放，不承载题单内容。'} />

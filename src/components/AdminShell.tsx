@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useState } from 'react'
 import { MetisButton, MetisMessage } from '@yuanfudao/metis-web-component'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -26,8 +26,7 @@ export function AdminShell({ children }: PropsWithChildren) {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const activeButtonRef = useRef<HTMLButtonElement>(null)
-  const navScrollRef = useRef<HTMLDivElement>(null)
+  const [libraryMenuOpen, setLibraryMenuOpen] = useState(false)
   const reviewMode = searchParams.get('mode') === 'review'
   const activePath = useMemo(() => {
     if (location.pathname.startsWith('/catalogs')) return '/catalogs'
@@ -42,13 +41,6 @@ export function AdminShell({ children }: PropsWithChildren) {
     navigate(`${location.pathname}${next.size ? `?${next.toString()}` : ''}`)
   }
 
-  useEffect(() => {
-    const container = navScrollRef.current
-    const activeButton = activeButtonRef.current
-    if (!container || !activeButton) return
-    container.scrollTop = Math.max(0, activeButton.offsetTop - container.offsetTop - container.clientHeight / 2)
-  }, [activePath])
-
   return (
     <div className={`admin-app ${reviewMode ? 'is-review' : ''}`}>
       <header className="global-header">
@@ -58,7 +50,39 @@ export function AdminShell({ children }: PropsWithChildren) {
           <span className="environment-pill">原型</span>
         </div>
         <nav className="global-nav" aria-label="平台主导航">
-          <span className="active">内容库</span>
+          <div className="library-menu-wrap">
+            <button
+              type="button"
+              className="library-menu-trigger active"
+              aria-expanded={libraryMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setLibraryMenuOpen((open) => !open)}
+            >
+              内容库 <span aria-hidden="true">▾</span>
+            </button>
+            {libraryMenuOpen && (
+              <div className="library-dropdown" role="menu" aria-label="内容库菜单">
+                <div className="library-dropdown-heading"><span>资源库管理</span><strong>内容库</strong></div>
+                <div className="library-dropdown-scroll">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      role="menuitem"
+                      className={activePath === item.path ? 'active' : ''}
+                      onClick={() => {
+                        setLibraryMenuOpen(false)
+                        if (item.path) navigate(item.path)
+                        else MetisMessage.info(`${item.label}为现有内容库页面，本原型不展开`)
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <span>内容生产</span>
           <span>任务管理</span>
           <span>培训考试</span>
@@ -67,27 +91,9 @@ export function AdminShell({ children }: PropsWithChildren) {
         <div className="account-meta">内容运营 · 王晓慧</div>
       </header>
 
-      <div className="workspace-shell">
-        <aside className="module-nav" aria-label="内容库导航">
-          <div className="module-nav-title">
-            <span>资源库管理</span>
-            <strong>内容库</strong>
-          </div>
-          <div className="module-nav-scroll" ref={navScrollRef}>
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                ref={activePath === item.path ? activeButtonRef : undefined}
-                type="button"
-                className={activePath === item.path ? 'active' : ''}
-                onClick={() => item.path ? navigate(item.path) : MetisMessage.info(`${item.label}为现有内容库页面，本原型不展开`)}
-              >
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </aside>
+      {libraryMenuOpen && <button className="library-menu-backdrop" type="button" aria-label="关闭内容库菜单" onClick={() => setLibraryMenuOpen(false)} />}
 
+      <div className="workspace-shell">
         <main className="workspace-content">{children}</main>
 
         {reviewMode && (
