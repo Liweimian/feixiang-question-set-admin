@@ -197,44 +197,49 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   }
 
   return (
-    <div className="page-container catalog-management-page">
-      <header className="page-heading" data-sec="1">
-        <div><span className="breadcrumb">内容库 / {isTextbook ? '教材目录' : '专题树'}</span><h1>{isTextbook ? '教材目录' : '专题树'}</h1><p>{isTextbook ? '维护同步练习使用的教材章节目录，并集中管理节点关联资源。' : '维护专题分类与层级，并将专题题单投放到对应节点。'}</p></div>
-        <div className="heading-actions"><MetisButton onClick={() => MetisMessage.info('打开目录排序')}>排序</MetisButton><MetisButton type="primary" onClick={() => MetisMessage.info(isTextbook ? '新建教材' : '新建专题节点')}>{isTextbook ? '新建教材' : '新建专题节点'}</MetisButton></div>
+    <div className="page-container textbook-tree-page">
+      <header className="textbook-page-banner" data-sec="1">
+        <div><span className="breadcrumb">内容库 / 标签管理 / 教材目录</span><h1>教材目录</h1></div>
+        <MetisButton onClick={() => MetisMessage.info('打开批量关联知识点')}>批量关联知识点</MetisButton>
       </header>
 
-      <section className="catalog-filter-card" data-sec="2">
-        <MetisSelect value={isTextbook ? 'middle-math' : 'middle-math-topic'} options={[{ label: '初中 / 数学', value: isTextbook ? 'middle-math' : 'middle-math-topic' }]} />
-        <MetisSelect value={isTextbook ? 'hj-2024' : 'all-topic'} options={[{ label: isTextbook ? '沪教版(五四制)(2024)' : '全部专题分类', value: isTextbook ? 'hj-2024' : 'all-topic' }]} />
-        <MetisSelect value="online" options={[{ label: '全部状态', value: 'all' }, { label: '上线', value: 'online' }, { label: '下线', value: 'offline' }]} />
-        <MetisInput placeholder={isTextbook ? '搜索教材、章节名称或ID' : '搜索专题节点名称或ID'} />
-        <MetisButton>搜索</MetisButton>
-      </section>
-
-      <section className="catalog-management-workbench" data-sec="3">
-        <aside className="catalog-tree-panel" aria-label={isTextbook ? '教材目录树' : '专题树'}>
-          <div className="catalog-tree-title"><div><strong>{isTextbook ? '教材章节' : '专题分类'}</strong><span>{nodes.length} 个节点</span></div><MetisButton type="borderless">全部展开</MetisButton></div>
+      <section className="textbook-tree-workbench" data-sec="2">
+        <aside className="textbook-tree-sidebar" aria-label="教材目录树">
+          <div className="textbook-filter-row">
+            <MetisSelect value="middle-math" options={[{ label: '初中 / 数学', value: 'middle-math' }]} />
+            <MetisSelect value="hj-2024" options={[{ label: '沪教版', value: 'hj-2024' }]} />
+            <MetisSelect value="all" options={[{ label: '全部', value: 'all' }, { label: '上线', value: 'online' }, { label: '下线', value: 'offline' }]} />
+          </div>
+          <MetisInput placeholder="请输入搜索内容" />
+          <div className="textbook-tree-actions"><MetisButton type="borderless">全部展开</MetisButton><MetisButton type="borderless" onClick={() => MetisMessage.info('进入教材排序')}>排序</MetisButton><MetisButton type="borderless" onClick={() => MetisMessage.info('新建教材')}>＋ 新建教材</MetisButton></div>
           <div className="catalog-node-list">
             {nodes.map((node) => <button key={node.id} type="button" className={`${selectedNode === node.id ? 'active' : ''} level-${node.level}`} onClick={() => setSelectedNode(node.id)}><span>{node.label}</span><span className="node-meta">{node.status && <MetisTag color={node.status === '上线' ? 'success' : 'default'}>{node.status}</MetisTag>}<small>{node.relationCount}</small></span></button>)}
           </div>
         </aside>
 
-        <div className="catalog-relation-content">
-          <div className="directory-node-heading">
-            <div><span>{isTextbook ? '[章节]' : '[专题节点]'}</span><h2>{currentNode.label}</h2><p>节点 ID：{currentNode.id} · {isTextbook ? `当前共 ${currentNode.relationCount} 项关联` : `当前已关联 ${bindings.length} 个题单`}</p></div>
-            <div><MetisButton onClick={() => MetisMessage.info('编辑当前节点')}>编辑节点</MetisButton><MetisButton type="primary" onClick={() => MetisMessage.info(`打开关联${relationLabel}选择器`)}>关联{relationLabel}</MetisButton></div>
-          </div>
+        <div className="textbook-tree-main">
+          <section className="textbook-node-actions" data-sec="3">
+            <h2><span>[{currentNode.level === 0 ? '教材' : currentNode.level === 1 ? '章节' : '节'}]</span> {currentNode.label}</h2>
+            <div><MetisButton onClick={() => MetisMessage.info('合并到其他章节')}>合并到其他章节</MetisButton><MetisButton onClick={() => MetisMessage.info('复制到其他章节')}>复制到其他章节</MetisButton></div>
+          </section>
 
-          {isTextbook ? <MetisTabs activeKey={relationTab} items={textbookRelationItems} onChange={(key) => setRelationTab(key as RelationTab)} /> : <div className="topic-relation-heading"><strong>关联题单</strong><span>专题节点只关联题单，不直接关联知识点、试卷或题目</span></div>}
+          <section className="textbook-basic-card" data-sec="4">
+            <div className="textbook-card-heading"><strong>基本信息</strong><MetisButton onClick={() => MetisMessage.info('编辑基本信息')}>编辑</MetisButton></div>
+            <dl><div><dt>ID</dt><dd>{currentNode.id}</dd></div><div><dt>入库顺序</dt><dd>1</dd></div><div><dt>章节序号</dt><dd>{currentNode.level === 2 ? '2' : '1'}</dd></div><div><dt>章节名称</dt><dd>{currentNode.label}</dd></div><div><dt>章节类型</dt><dd>{currentNode.level === 0 ? '教材' : '正式章节'}</dd></div><div><dt>所需课时数</dt><dd>{currentNode.level === 0 ? '-' : '1'}</dd></div><div><dt>上下线状态</dt><dd>{currentNode.status ?? '上线'}</dd></div></dl>
+          </section>
+
+          <section className="textbook-relations-card" data-sec="5">
+          <MetisTabs activeKey={relationTab} items={textbookRelationItems} onChange={(key) => setRelationTab(key as RelationTab)} />
 
           {relationTab === 'questionSet' ? <div className="relation-panel">
-            <MetisAlert type="info" showIcon message="前台可见 = 有效目录关联 + 已上线题单版本" description={isTextbook ? '教材目录用于同步练习投放；题单生成后仍需在此确认关联关系。' : '专题树只负责专题题单的分类与投放，不承载题单内容。'} />
+            <MetisAlert type="info" showIcon message="前台可见 = 有效目录关联 + 已上线题单版本" description="教材目录用于同步练习投放；题单生成后仍需在此确认关联关系。" />
             <div className="relation-subtabs"><MetisTabs activeKey={questionSetView} items={[{ key: 'bound', label: `已关联（${bindings.length}）` }, { key: 'pending', label: `待关联池（${pendingSets.length}）` }]} onChange={(key) => setQuestionSetView(key as 'bound' | 'pending')} /></div>
             {questionSetView === 'bound' ? <MetisTable<CatalogBinding> rowKey="id" columns={bindingColumns} dataSource={bindings} pagination={false} /> : <MetisTable<QuestionSet> rowKey="id" columns={pendingColumns} dataSource={pendingSets} pagination={{ pageSize: 6 }} />}
           </div> : <div className="relation-panel">
             <div className="relation-toolbar"><div><strong>已关联{relationLabel}</strong><span>关联关系仅作用于当前目录节点</span></div><div><MetisInput placeholder={`按${relationLabel}名称或ID搜索`} /><MetisButton>搜索</MetisButton></div></div>
             <MetisTable<RelatedResource> rowKey="id" columns={resourceColumns} dataSource={resourcesByTab[relationTab]} pagination={false} />
           </div>}
+          </section>
         </div>
       </section>
     </div>
