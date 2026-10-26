@@ -9,8 +9,8 @@ import type {
 
 const contentMeta: Record<ContentStatus, { label: string; color: string }> = {
   draft: { label: '草稿', color: 'default' },
-  review: { label: '待审核', color: 'processing' },
-  ready: { label: '待发布', color: 'warning' },
+  review: { label: '草稿', color: 'default' },
+  ready: { label: '草稿', color: 'default' },
   published: { label: '已上线', color: 'success' },
   offline: { label: '已下线', color: 'default' },
 }

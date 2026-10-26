@@ -90,6 +90,7 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const expectedTreeType = isTextbook ? '同步练习树' : '专题树'
   const bindings = boundRows.filter((binding) => binding.treeType === expectedTreeType && binding.nodeId === selectedNode)
   const selectableSets = useMemo(() => questionSets.filter((item) => {
+    if (item.type !== 'sync' && item.type !== 'topic') return false
     const keyword = questionSetKeyword.trim().toLowerCase()
     return !keyword || item.id.toLowerCase().includes(keyword) || item.title.toLowerCase().includes(keyword) || item.source.chapterPath.toLowerCase().includes(keyword)
   }), [questionSetKeyword])

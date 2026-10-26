@@ -14,6 +14,7 @@ export const questionSetRepository: QuestionSetRepository = {
     await wait(260)
     const keyword = query.keyword?.trim().toLowerCase() ?? ''
     const filtered = questionSets.filter((item) => {
+      if (item.type !== 'sync' && item.type !== 'topic') return false
       const keywordMatched = !keyword || [item.id, item.title, item.source.workbookId, ...item.source.chapterIds]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(keyword))

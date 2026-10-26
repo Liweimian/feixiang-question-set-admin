@@ -7,7 +7,6 @@ import {
   MetisMessage,
   MetisSelect,
   MetisTable,
-  MetisTabs,
   MetisTag,
 } from '@yuanfudao/metis-web-component'
 import { useNavigate } from 'react-router-dom'
@@ -68,11 +67,12 @@ export function QuestionSetListPage() {
       title: '题单ID / 名称', dataIndex: 'title', key: 'title', width: 300,
       render: (_: unknown, item: QuestionSet) => (
         <div className="title-cell">
-          <div><TypeTag value={item.type} /><button type="button" onClick={() => navigate(`/assets/${item.id}`)}>{item.title}</button></div>
+          <div><button type="button" onClick={() => navigate(`/assets/${item.id}`)}>{item.title}</button></div>
           <span>{item.id} · {item.tags.join(' / ')}</span>
         </div>
       ),
     },
+    { title: '类型', dataIndex: 'type', key: 'type', width: 110, render: (_: unknown, item: QuestionSet) => <TypeTag value={item.type} /> },
     {
       title: '阶段 / 科目 / 年级', key: 'scope', width: 170,
       render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.scope.phase} · {item.scope.subject}</strong><span>{item.scope.grade} · {item.scope.volume}</span></div>,
@@ -111,7 +111,7 @@ export function QuestionSetListPage() {
         <div>
           <span className="breadcrumb">内容库 / 题单库</span>
           <h1>题单库</h1>
-          <p>统一管理同步练习、专题及其他题单；生成记录与规则作为题单库的辅助能力。</p>
+          <p>统一管理同步练习与专题题单；生成记录与规则作为题单库的辅助能力。</p>
         </div>
         <div className="heading-actions">
           <MetisButton onClick={() => navigate('/jobs')}>生成记录</MetisButton>
@@ -127,6 +127,7 @@ export function QuestionSetListPage() {
           <FilterField label="题单ID"><MetisInput value={query.filters.id} placeholder="多个ID可分行输入" onChange={(event) => updateFilters({ id: event.target.value })} /></FilterField>
           <FilterField label="名称"><MetisInput value={query.filters.title} placeholder="请输入题单名称" onChange={(event) => updateFilters({ title: event.target.value })} /></FilterField>
           <FilterField label="题目ID"><MetisInput value={query.filters.questionId} placeholder="请输入题目ID" onChange={(event) => updateFilters({ questionId: event.target.value })} /></FilterField>
+          <FilterField label="类型"><MetisSelect allowClear value={query.filters.type} placeholder="全部类型" options={[{label:'同步练习',value:'sync'},{label:'专题',value:'topic'}]} onChange={(value) => updateFilters({ type: value as QuestionSetType | undefined })} /></FilterField>
           <FilterField label="阶段"><MetisSelect allowClear value={query.filters.phase} placeholder="全部阶段" options={[{label:'小学',value:'小学'},{label:'初中',value:'初中'},{label:'高中',value:'高中'}]} onChange={(value) => updateFilters({ phase: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="科目"><MetisSelect allowClear value={query.filters.subject} placeholder="全部科目" options={[{label:'语文',value:'语文'},{label:'数学',value:'数学'},{label:'英语',value:'英语'},{label:'物理',value:'物理'}]} onChange={(value) => updateFilters({ subject: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="年级"><MetisSelect allowClear value={query.filters.grade} placeholder="全部年级" options={[{label:'七年级',value:'七年级'},{label:'八年级',value:'八年级'},{label:'九年级',value:'九年级'}]} onChange={(value) => updateFilters({ grade: value ? String(value) : undefined })} /></FilterField>
@@ -134,7 +135,7 @@ export function QuestionSetListPage() {
           <FilterField label="生产方式"><MetisSelect allowClear value={query.filters.method} placeholder="全部生产方式" options={[{label:'练习册生成',value:'workbook'},{label:'人工组题',value:'manual'},{label:'规则生成',value:'rule'}]} onChange={(value) => updateFilters({ method: value as ProductionMethod | undefined })} /></FilterField>
           <FilterField label="来源练习册ID"><MetisInput value={query.filters.workbookId} placeholder="请输入练习册ID" onChange={(event) => updateFilters({ workbookId: event.target.value })} /></FilterField>
           {expandedFilters && <>
-            <FilterField label="内容状态"><MetisSelect allowClear value={query.filters.contentStatus} placeholder="全部内容状态" options={[{label:'草稿',value:'draft'},{label:'待审核',value:'review'},{label:'待发布',value:'ready'},{label:'已上线',value:'published'},{label:'已下线',value:'offline'}]} onChange={(value) => updateFilters({ contentStatus: value as ContentStatus | undefined })} /></FilterField>
+            <FilterField label="内容状态"><MetisSelect allowClear value={query.filters.contentStatus} placeholder="全部内容状态" options={[{label:'草稿',value:'draft'},{label:'已上线',value:'published'},{label:'已下线',value:'offline'}]} onChange={(value) => updateFilters({ contentStatus: value as ContentStatus | undefined })} /></FilterField>
             <FilterField label="上游状态"><MetisSelect allowClear value={query.filters.syncStatus} placeholder="全部上游状态" options={[{label:'已同步',value:'synced'},{label:'上游有变更',value:'changed'},{label:'同步冲突',value:'conflict'},{label:'人工锁定',value:'locked'},{label:'来源失效',value:'invalid'}]} onChange={(value) => updateFilters({ syncStatus: value as SyncStatus | undefined })} /></FilterField>
             <FilterField label="目录关联"><MetisSelect allowClear value={query.filters.bindingStatus} placeholder="全部关联状态" options={[{label:'已关联',value:'bound'},{label:'待关联',value:'pending'},{label:'部分关联',value:'partial'},{label:'关联失效',value:'invalid'}]} onChange={(value) => updateFilters({ bindingStatus: value as BindingStatus | undefined })} /></FilterField>
             <FilterField label="负责人"><MetisSelect allowClear value={query.filters.owner} placeholder="全部负责人" options={[{label:'王晓慧',value:'王晓慧'},{label:'李明',value:'李明'},{label:'赵琪',value:'赵琪'},{label:'陈薇',value:'陈薇'}]} onChange={(value) => updateFilters({ owner: value ? String(value) : undefined })} /></FilterField>
@@ -144,12 +145,10 @@ export function QuestionSetListPage() {
       </section>
 
       <section className="table-card" data-sec="3">
-        <MetisTabs activeKey={query.filters.type ?? 'all'} items={[{key:'all',label:'全部题单'},{key:'sync',label:'同步练习'},{key:'topic',label:'专题'},{key:'custom',label:'其他'}]} onChange={(key) => updateFilters({ type: key === 'all' ? undefined : key as QuestionSetType })} />
         <div className="table-toolbar">
           <div><strong>题单列表</strong><span>当前筛选共 {result.total} 条</span></div>
           <div className="toolbar-actions">
             {selectedKeys.length > 0 && <MetisTag color="processing">已选 {selectedKeys.length} 项</MetisTag>}
-            <MetisButton disabled={!selectedKeys.length} onClick={() => MetisMessage.success('已批量提交审核')}>批量提交审核</MetisButton>
             <MetisButton disabled={!selectedKeys.length} onClick={() => navigate('/catalogs')}>批量关联目录</MetisButton>
             <MetisButton disabled={!selectedKeys.length} onClick={() => MetisMessage.info('打开批量标签操作')}>批量打标签</MetisButton>
           </div>
@@ -160,7 +159,7 @@ export function QuestionSetListPage() {
             loading={status === 'loading'}
             columns={columns}
             dataSource={result.items}
-            scroll={{ x: 1510 }}
+            scroll={{ x: 1620 }}
             rowSelection={{ selectedRowKeys: selectedKeys, onChange: (keys: Key[]) => setSelectedKeys(keys) }}
             pagination={{ current: query.page, pageSize: query.pageSize, total: result.total, onChange: (page: number, pageSize: number) => setQuery((current) => ({ ...current, page, pageSize })) }}
           />

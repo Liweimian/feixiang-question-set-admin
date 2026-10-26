@@ -81,7 +81,7 @@ export function GenerationJobsPage() {
           <i>→</i>
           <div><small>生成</small><strong>一章节一题单草稿</strong><span>按题目 ID 去重、保留模块顺序</span></div>
           <i>→</i>
-          <div><small>交付</small><strong>质检 + 待审核</strong><span>唯一映射才自动关联目录</span></div>
+          <div><small>交付</small><strong>质检 + 生成草稿</strong><span>唯一映射才自动关联目录</span></div>
         </div>
       </section>
 

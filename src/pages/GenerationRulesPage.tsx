@@ -62,7 +62,7 @@ export function GenerationRulesPage() {
           <div><small>02 资格识别</small><strong>末级章节标记“生成同步题单”</strong><span>章节上线且至少 1 道合格题</span></div><i>→</i>
           <div><small>03 聚合题目</small><strong>递归章节下全部模块</strong><span>过滤下线题；按题目 ID 去重</span></div><i>→</i>
           <div><small>04 生成草稿</small><strong>幂等新建或创建候选版本</strong><span>源基线 + 持久人工覆盖</span></div><i>→</i>
-          <div><small>05 质检交付</small><strong>通过门禁后进入待审核</strong><span>一期永不自动发布</span></div>
+          <div><small>05 质检交付</small><strong>通过门禁后生成草稿</strong><span>由运营继续编辑与维护</span></div>
         </div>
       </section>
 
