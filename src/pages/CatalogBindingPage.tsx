@@ -76,12 +76,14 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const [selectedNode, setSelectedNode] = useState(isTextbook ? 'TC-310418' : 'TOPIC-2201')
   const [relationTab, setRelationTab] = useState<RelationTab>(isTextbook ? 'knowledge' : 'questionSet')
   const [questionSetView, setQuestionSetView] = useState<'bound' | 'pending'>('bound')
+  const [topicPanel, setTopicPanel] = useState<'sets' | 'history'>('sets')
   const [boundRows, setBoundRows] = useState(catalogBindings)
 
   useEffect(() => {
     setSelectedNode(isTextbook ? 'TC-310418' : 'TOPIC-2201')
     setRelationTab(isTextbook ? 'knowledge' : 'questionSet')
     setQuestionSetView('bound')
+    setTopicPanel('sets')
   }, [isTextbook])
 
   const currentNode = nodes.find((node) => node.id === selectedNode) ?? nodes[0]
@@ -131,6 +133,68 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   ]
 
   const relationLabel = { knowledge: '知识点', paper: '试卷', questionSet: '题单', question: '题目' }[relationTab]
+
+  const topicHistory = [
+    { id: 'LOG-1038', action: '关联题单', detail: '关联「二次根式易错专项训练」', operator: '王晓慧', updatedAt: '2026-10-25 16:42' },
+    { id: 'LOG-1026', action: '编辑节点', detail: '节点名称由「根式易错」修改为「二次根式易错」', operator: '李嘉', updatedAt: '2026-10-24 11:18' },
+    { id: 'LOG-1009', action: '上线节点', detail: '专题节点上线，可用于前台投放', operator: '王晓慧', updatedAt: '2026-10-22 09:30' },
+  ]
+
+  if (!isTextbook) {
+    const topicBindingColumns = [
+      { title: '题单ID / 名称', key: 'set', width: 360, render: (_: unknown, item: CatalogBinding) => <div className="stacked-cell"><strong>{item.setTitle}</strong><span>{item.setId}</span></div> },
+      { title: '题单类型', key: 'type', width: 120, render: () => <MetisTag color="purple">专题</MetisTag> },
+      { title: '题量', key: 'count', width: 90, render: (_: unknown, item: CatalogBinding) => questionSets.find((set) => set.id === item.setId)?.questionCount ?? 18 },
+      { title: '来源', key: 'source', render: (_: unknown, item: CatalogBinding) => questionSets.find((set) => set.id === item.setId)?.source.chapterPath ?? '人工组题' },
+      { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: (value: string) => <MetisTag color={value === '有效' ? 'success' : 'warning'}>{value}</MetisTag> },
+      { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt', width: 150 },
+      { title: '操作', key: 'actions', width: 150, render: (_: unknown, item: CatalogBinding) => <div className="table-actions"><MetisButton type="borderless" onClick={() => MetisMessage.info(`预览 ${item.setTitle}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => setBoundRows((rows) => rows.filter((row) => row.id !== item.id))}>移除</MetisButton></div> },
+    ]
+    const topicHistoryColumns = [
+      { title: '操作类型', dataIndex: 'action', key: 'action', width: 140 },
+      { title: '操作内容', dataIndex: 'detail', key: 'detail' },
+      { title: '操作人', dataIndex: 'operator', key: 'operator', width: 120 },
+      { title: '操作时间', dataIndex: 'updatedAt', key: 'updatedAt', width: 180 },
+    ]
+
+    return (
+      <div className="page-container topic-tree-page">
+        <header className="topic-page-banner" data-sec="1">
+          <span className="breadcrumb">内容库 / 标签管理 / 专题树</span>
+          <h1>专题树</h1>
+        </header>
+
+        <section className="topic-tree-workbench" data-sec="2">
+          <aside className="topic-tree-sidebar" aria-label="专题树">
+            <MetisSelect value="middle-math-topic" options={[{ label: '初中 / 数学', value: 'middle-math-topic' }]} />
+            <MetisInput placeholder="搜索专题名称或ID" />
+            <div className="topic-tree-actions"><MetisButton type="borderless">全部展开</MetisButton><MetisButton type="borderless" onClick={() => MetisMessage.info('进入专题节点排序')}>排序</MetisButton><MetisButton type="borderless" onClick={() => MetisMessage.info('新建一级专题')}>＋ 新建一级专题</MetisButton></div>
+            <div className="topic-tree-list">
+              {nodes.map((node) => <button key={node.id} type="button" className={`${selectedNode === node.id ? 'active' : ''} level-${node.level}`} onClick={() => setSelectedNode(node.id)}><span>{node.level === 0 ? '▾ ' : ''}{node.label}</span>{node.status && <MetisTag color={node.status === '上线' ? 'success' : 'default'}>{node.status}</MetisTag>}</button>)}
+            </div>
+          </aside>
+
+          <div className="topic-tree-main">
+            <section className="topic-node-card" data-sec="3">
+              <div><div className="topic-node-title"><h2>{currentNode.label}</h2><MetisButton type="borderless" onClick={() => MetisMessage.info('编辑当前专题节点')}>编辑</MetisButton></div><p>ID：{currentNode.id}</p></div>
+              <MetisTag color={currentNode.status === '下线' ? 'default' : 'success'}>{currentNode.status ?? '上线'}</MetisTag>
+            </section>
+
+            <section className="topic-assets-card" data-sec="4">
+              <MetisTabs activeKey={topicPanel} items={[{ key: 'sets', label: `关联题单（${bindings.length}）` }, { key: 'history', label: '操作记录' }]} onChange={(key) => setTopicPanel(key as 'sets' | 'history')} />
+              {topicPanel === 'sets' ? <>
+                <div className="topic-set-toolbar">
+                  <div><MetisButton type="borderless">全选本页</MetisButton><MetisButton type="borderless" disabled>移出</MetisButton><MetisButton type="borderless" disabled>移动到</MetisButton></div>
+                  <MetisButton type="borderless" onClick={() => setQuestionSetView('pending')}>＋ 关联题单</MetisButton>
+                </div>
+                {questionSetView === 'pending' ? <div className="topic-pending-panel"><div className="relation-toolbar"><div><strong>待关联题单</strong><span>选择题单后关联至「{currentNode.label}」</span></div><MetisButton type="borderless" onClick={() => setQuestionSetView('bound')}>返回已关联</MetisButton></div><MetisTable<QuestionSet> rowKey="id" columns={pendingColumns} dataSource={pendingSets} pagination={{ pageSize: 6 }} /></div> : <MetisTable<CatalogBinding> rowKey="id" columns={topicBindingColumns} dataSource={bindings} pagination={{ pageSize: 10 }} />}
+              </> : <MetisTable rowKey="id" columns={topicHistoryColumns} dataSource={topicHistory} pagination={false} />}
+            </section>
+          </div>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="page-container catalog-management-page">
