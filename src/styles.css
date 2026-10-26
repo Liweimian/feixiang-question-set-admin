@@ -292,6 +292,9 @@ button:focus-visible { outline: 2px solid var(--fx_admin_brand); outline-offset:
 .textbook-basic-card dt { color: var(--fx_admin_text_secondary); }
 .textbook-basic-card dd { margin: 0; }
 .textbook-relations-card { min-width: 0; padding: 20px 28px 28px; }
+.textbook-question-set-heading { min-height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--fx_admin_border); }
+.textbook-question-set-heading h3 { margin: 0; font-size: 20px; }
+.textbook-question-set-panel [class*="table"] { margin-top: 18px; }
 .relation-toolbar { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .relation-toolbar > div:first-child { display: grid; gap: 4px; }
 .relation-toolbar > div:first-child span { color: var(--fx_admin_text_tertiary); font-size: 11px; }
