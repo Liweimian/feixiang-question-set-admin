@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   MetisButton,
+  MetisDialog,
   MetisInput,
   MetisMessage,
   MetisSelect,
@@ -74,21 +75,24 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const nodes = isTextbook ? textbookNodes : topicNodes
   const [selectedNode, setSelectedNode] = useState(isTextbook ? 'TC-310418' : 'TOPIC-2201')
   const [relationTab, setRelationTab] = useState<RelationTab>(isTextbook ? 'knowledge' : 'questionSet')
-  const [questionSetView, setQuestionSetView] = useState<'bound' | 'pending'>('bound')
   const [topicPanel, setTopicPanel] = useState<'sets' | 'history'>('sets')
+  const [questionSetDialogOpen, setQuestionSetDialogOpen] = useState(false)
+  const [questionSetKeyword, setQuestionSetKeyword] = useState('')
   const [boundRows, setBoundRows] = useState(catalogBindings)
 
   useEffect(() => {
     setSelectedNode(isTextbook ? 'TC-310418' : 'TOPIC-2201')
     setRelationTab(isTextbook ? 'knowledge' : 'questionSet')
-    setQuestionSetView('bound')
     setTopicPanel('sets')
   }, [isTextbook])
 
   const currentNode = nodes.find((node) => node.id === selectedNode) ?? nodes[0]
   const expectedTreeType = isTextbook ? '同步练习树' : '专题树'
   const bindings = boundRows.filter((binding) => binding.treeType === expectedTreeType && binding.nodeId === selectedNode)
-  const pendingSets = useMemo(() => questionSets.filter((item) => item.bindingStatus === 'pending' || item.bindingStatus === 'partial'), [])
+  const selectableSets = useMemo(() => questionSets.filter((item) => {
+    const keyword = questionSetKeyword.trim().toLowerCase()
+    return !keyword || item.id.toLowerCase().includes(keyword) || item.title.toLowerCase().includes(keyword) || item.source.chapterPath.toLowerCase().includes(keyword)
+  }), [questionSetKeyword])
 
   const resourceColumns = [
     { title: '资源ID', dataIndex: 'id', key: 'id', width: 130 },
@@ -108,22 +112,6 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
     { title: '操作', key: 'actions', width: 180, render: (_: unknown, item: CatalogBinding) => <div className="table-actions"><MetisButton type="borderless" onClick={() => MetisMessage.info(`查看 ${item.setTitle}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => setBoundRows((rows) => rows.filter((row) => row.id !== item.id))}>解除关联</MetisButton></div> },
   ]
 
-  const pendingColumns = [
-    { title: '待关联题单', key: 'set', width: 360, render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.title}</strong><span>{item.id} · {item.scope.subject} · {item.scope.grade}</span></div> },
-    { title: '来源章节', key: 'source', render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.source.chapterIds.join('、') || '-'}</strong><span>{item.source.chapterPath}</span></div> },
-    { title: '题量', dataIndex: 'questionCount', key: 'questionCount', width: 80 },
-    { title: '建议', key: 'suggestion', width: 170, render: (_: unknown, item: QuestionSet) => <MetisTag color={item.type === 'topic' ? 'purple' : 'processing'}>{item.type === 'topic' ? '建议关联专题树' : '建议关联教材目录'}</MetisTag> },
-    {
-      title: '操作', key: 'actions', width: 130,
-      render: (_: unknown, item: QuestionSet) => <MetisButton type="primary" onClick={() => {
-        const next: CatalogBinding = { id: `BIND-${Date.now()}`, treeType: expectedTreeType, nodePath: currentNode.label, nodeId: currentNode.id, setTitle: item.title, setId: item.id, primary: true, region: '全国', status: '待生效', operator: '王晓慧', updatedAt: '刚刚' }
-        setBoundRows((rows) => [...rows, next])
-        setQuestionSetView('bound')
-        MetisMessage.success(`已将 ${item.id} 关联到 ${currentNode.label}`)
-      }}>关联到此节点</MetisButton>,
-    },
-  ]
-
   const textbookRelationItems = [
     { key: 'knowledge', label: `关联知识点（${resourcesByTab.knowledge.length}）` },
     { key: 'paper', label: `关联试卷（${resourcesByTab.paper.length}）` },
@@ -138,6 +126,31 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
     { id: 'LOG-1026', action: '编辑节点', detail: '节点名称由「根式易错」修改为「二次根式易错」', operator: '李嘉', updatedAt: '2026-10-24 11:18' },
     { id: 'LOG-1009', action: '上线节点', detail: '专题节点上线，可用于前台投放', operator: '王晓慧', updatedAt: '2026-10-22 09:30' },
   ]
+
+  const libraryColumns = [
+    { title: '题单ID / 名称', key: 'set', width: 330, render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.title}</strong><span>{item.id}</span></div> },
+    { title: '类型', key: 'type', width: 110, render: (_: unknown, item: QuestionSet) => <MetisTag color={item.type === 'topic' ? 'purple' : item.type === 'sync' ? 'processing' : 'default'}>{item.type === 'topic' ? '专题' : item.type === 'sync' ? '同步练习' : '其他'}</MetisTag> },
+    { title: '教学范围', key: 'scope', width: 170, render: (_: unknown, item: QuestionSet) => `${item.scope.phase} · ${item.scope.subject} · ${item.scope.grade}` },
+    { title: '来源', key: 'source', render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.source.workbookName ?? '人工组题'}</strong><span>{item.source.chapterPath}</span></div> },
+    { title: '题量', dataIndex: 'questionCount', key: 'questionCount', width: 70 },
+    { title: '状态', key: 'status', width: 100, render: (_: unknown, item: QuestionSet) => <MetisTag color={item.contentStatus === 'published' ? 'success' : 'warning'}>{item.contentStatus === 'published' ? '已上线' : '未上线'}</MetisTag> },
+    { title: '操作', key: 'actions', width: 110, render: (_: unknown, item: QuestionSet) => {
+      const alreadyBound = bindings.some((binding) => binding.setId === item.id)
+      return <MetisButton type="primary" disabled={alreadyBound} onClick={() => {
+        const next: CatalogBinding = { id: `BIND-${Date.now()}`, treeType: expectedTreeType, nodePath: currentNode.label, nodeId: currentNode.id, setTitle: item.title, setId: item.id, primary: true, region: '全国', status: '待生效', operator: '王晓慧', updatedAt: '刚刚' }
+        setBoundRows((rows) => [...rows, next])
+        setQuestionSetDialogOpen(false)
+        MetisMessage.success(`已将 ${item.id} 关联到 ${currentNode.label}`)
+      }}>{alreadyBound ? '已关联' : '关联'}</MetisButton>
+    } },
+  ]
+
+  const questionSetLibraryDialog = <MetisDialog title={`关联题单 · ${currentNode.label}`} open={questionSetDialogOpen} width={1120} footer={null} onCancel={() => setQuestionSetDialogOpen(false)}>
+    <div className="question-set-picker">
+      <div className="question-set-picker-toolbar"><div><strong>题单库</strong><span>共 {selectableSets.length} 条题单</span></div><MetisInput value={questionSetKeyword} onChange={(event) => setQuestionSetKeyword(event.target.value)} placeholder="搜索题单ID、名称或来源章节" /></div>
+      <MetisTable<QuestionSet> rowKey="id" columns={libraryColumns} dataSource={selectableSets} pagination={{ pageSize: 6 }} />
+    </div>
+  </MetisDialog>
 
   if (!isTextbook) {
     const topicBindingColumns = [
@@ -184,13 +197,14 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
               {topicPanel === 'sets' ? <>
                 <div className="topic-set-toolbar">
                   <div><MetisButton type="borderless">全选本页</MetisButton><MetisButton type="borderless" disabled>移出</MetisButton><MetisButton type="borderless" disabled>移动到</MetisButton></div>
-                  <MetisButton type="borderless" onClick={() => setQuestionSetView('pending')}>＋ 关联题单</MetisButton>
+                  <MetisButton type="borderless" onClick={() => setQuestionSetDialogOpen(true)}>＋ 关联题单</MetisButton>
                 </div>
-                {questionSetView === 'pending' ? <div className="topic-pending-panel"><div className="relation-toolbar"><div><strong>待关联题单</strong><span>选择题单后关联至「{currentNode.label}」</span></div><MetisButton type="borderless" onClick={() => setQuestionSetView('bound')}>返回已关联</MetisButton></div><MetisTable<QuestionSet> rowKey="id" columns={pendingColumns} dataSource={pendingSets} pagination={{ pageSize: 6 }} /></div> : <MetisTable<CatalogBinding> rowKey="id" columns={topicBindingColumns} dataSource={bindings} pagination={{ pageSize: 10 }} />}
+                <MetisTable<CatalogBinding> rowKey="id" columns={topicBindingColumns} dataSource={bindings} pagination={{ pageSize: 10 }} />
               </> : <MetisTable rowKey="id" columns={topicHistoryColumns} dataSource={topicHistory} pagination={false} />}
             </section>
           </div>
         </section>
+        {questionSetLibraryDialog}
       </div>
     )
   }
@@ -231,8 +245,8 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
           <MetisTabs activeKey={relationTab} items={textbookRelationItems} onChange={(key) => setRelationTab(key as RelationTab)} />
 
           {relationTab === 'questionSet' ? <div className="relation-panel textbook-question-set-panel">
-            <div className="textbook-question-set-heading"><h3>关联题单</h3><MetisButton type="borderless" onClick={() => setQuestionSetView('pending')}>＋ 关联题单</MetisButton></div>
-            {questionSetView === 'pending' ? <div className="topic-pending-panel"><div className="relation-toolbar"><div><strong>选择题单</strong><span>选择后关联到当前教材章节</span></div><MetisButton type="borderless" onClick={() => setQuestionSetView('bound')}>返回关联列表</MetisButton></div><MetisTable<QuestionSet> rowKey="id" columns={pendingColumns} dataSource={pendingSets} pagination={{ pageSize: 6 }} /></div> : <MetisTable<CatalogBinding> rowKey="id" columns={textbookQuestionSetColumns} dataSource={bindings} pagination={false} />}
+            <div className="textbook-question-set-heading"><h3>关联题单</h3><MetisButton type="borderless" onClick={() => setQuestionSetDialogOpen(true)}>＋ 关联题单</MetisButton></div>
+            <MetisTable<CatalogBinding> rowKey="id" columns={textbookQuestionSetColumns} dataSource={bindings} pagination={false} />
           </div> : <div className="relation-panel">
             <div className="relation-toolbar"><div><strong>已关联{relationLabel}</strong><span>关联关系仅作用于当前目录节点</span></div><div><MetisInput placeholder={`按${relationLabel}名称或ID搜索`} /><MetisButton>搜索</MetisButton></div></div>
             <MetisTable<RelatedResource> rowKey="id" columns={resourceColumns} dataSource={resourcesByTab[relationTab]} pagination={false} />
@@ -240,6 +254,7 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
           </section>
         </div>
       </section>
+      {questionSetLibraryDialog}
     </div>
   )
 }
