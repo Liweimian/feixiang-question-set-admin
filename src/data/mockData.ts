@@ -209,14 +209,6 @@ export const detailQuestions: QuestionItem[] = [
   { id: '89298141', revision: 'R1', order: 6, group: '三、解答题', stem: '结合数轴说明算术平方根的取值范围，并完成相应计算。', type: '解答题', difficulty: '中等', sourceModule: '模块1686169', origin: 'source', quality: 'passed' },
 ]
 
-export const questionPool: QuestionItem[] = [
-  ...detailQuestions,
-  { id: '90610218', revision: 'R2', order: 7, group: '一、选择题', stem: '下列各数中，没有算术平方根的是（ ）。', type: '单选题', difficulty: '容易', sourceModule: '教材章节 19.1(1)', origin: 'source', quality: 'passed' },
-  { id: '90610226', revision: 'R1', order: 8, group: '一、选择题', stem: '若一个数的算术平方根为 3，则这个数是（ ）。', type: '单选题', difficulty: '较易', sourceModule: '名校同步试卷', origin: 'source', quality: 'passed' },
-  { id: '90610315', revision: 'R3', order: 9, group: '二、填空题', stem: '比较 √7 与 3 的大小：√7____3。', type: '填空题', difficulty: '较易', sourceModule: '一课一练·拓展模块', origin: 'source', quality: 'passed' },
-  { id: '90610402', revision: 'R1', order: 10, group: '三、解答题', stem: '已知 2a-1 的算术平方根是 5，求 a 的值。', type: '解答题', difficulty: '中等', sourceModule: '精选题单·实数专题', origin: 'source', quality: 'passed' },
-]
-
 export const versions: VersionRecord[] = [
   { version: 'V4 草稿', status: '处理上游变更', sourceSnapshot: '8554@2026-10-21', summary: '源新增 3 题、移除 1 题；保留 2 条人工调整', questionCount: 28, creator: '王晓慧', createdAt: '2026-10-21 17:46' },
   { version: 'V3', status: '当前线上', sourceSnapshot: '8554@2026-10-13', summary: '替换 1 道重复题，调整选择题顺序', questionCount: 26, creator: '王晓慧', createdAt: '2026-10-13 21:30', publishedAt: '2026-10-14 10:00' },

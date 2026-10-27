@@ -89,7 +89,7 @@ export function QuestionSetListPage() {
     },
     {
       title: '操作', key: 'actions', fixed: 'right' as const, width: 145,
-      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}/edit`)}>编辑</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>查看</MetisButton></div>,
+      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>编辑</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>查看</MetisButton></div>,
     },
   ], [navigate])
 
