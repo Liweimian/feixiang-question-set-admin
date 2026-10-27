@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MetisButton, MetisEmpty, MetisMessage, MetisTable, MetisTabs, MetisTag } from '@yuanfudao/metis-web-component'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ContentStatusTag, MethodLabel, TypeTag } from '../components/StatusTags'
 import { detailQuestions, generationJobs } from '../data/mockData'
-import type { GenerationJob, QuestionItem, QuestionSet } from '../features/question-sets/types'
+import type { GenerationJob, QuestionSet } from '../features/question-sets/types'
 import { questionSetRepository } from '../services/questionSetRepository'
 
 export function QuestionSetDetailPage() {
@@ -11,34 +11,12 @@ export function QuestionSetDetailPage() {
   const { id = 'QS-10458' } = useParams()
   const [record, setRecord] = useState<QuestionSet>()
   const [loading, setLoading] = useState(true)
-  const [questions, setQuestions] = useState(detailQuestions)
   const [activeTab, setActiveTab] = useState('content')
 
   useEffect(() => {
     setLoading(true)
     void questionSetRepository.get(id).then((item) => { setRecord(item); setLoading(false) })
   }, [id])
-
-  const moveQuestion = (questionId: string, delta: number) => {
-    setQuestions((current) => {
-      const sourceIndex = current.findIndex((item) => item.id === questionId)
-      const targetIndex = sourceIndex + delta
-      if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= current.length) return current
-      const next = [...current]
-      const [moved] = next.splice(sourceIndex, 1)
-      next.splice(targetIndex, 0, moved)
-      return next.map((item, index) => ({ ...item, order: index + 1 }))
-    })
-  }
-
-  const questionColumns = useMemo(() => [
-    { title: '序号', dataIndex: 'order', key: 'order', width: 70 },
-    { title: '题目内容', key: 'stem', render: (_: unknown, item: QuestionItem) => <div className="question-title-cell"><div><button type="button">{item.id}</button><MetisTag>{item.group}</MetisTag></div><p>{item.stem}</p><span>{item.sourceModule} · 题目版本 {item.revision}</span></div> },
-    { title: '题型', dataIndex: 'type', key: 'type', width: 110 },
-    { title: '难度', dataIndex: 'difficulty', key: 'difficulty', width: 100 },
-    { title: '来源', key: 'origin', width: 120, render: (_: unknown, item: QuestionItem) => <MetisTag color={item.origin === 'manual' ? 'purple' : 'processing'}>{item.origin === 'manual' ? '人工添加' : '来源继承'}</MetisTag> },
-    { title: '操作', key: 'actions', width: 190, render: (_: unknown, item: QuestionItem) => <div className="table-actions"><MetisButton type="borderless" disabled={item.order === 1} onClick={() => moveQuestion(item.id, -1)}>上移</MetisButton><MetisButton type="borderless" onClick={() => moveQuestion(item.id, 1)}>下移</MetisButton><MetisButton type="borderless" onClick={() => setQuestions((rows) => rows.filter((row) => row.id !== item.id))}>移除</MetisButton></div> },
-  ], [])
 
   if (loading) return <div className="page-container"><div className="loading-card">正在加载题单…</div></div>
   if (!record) return <div className="page-container"><div className="feedback-state"><MetisEmpty description="未找到该题单" /><MetisButton onClick={() => navigate('/assets')}>返回题单库</MetisButton></div></div>
@@ -54,7 +32,7 @@ export function QuestionSetDetailPage() {
     { title: '发起人 / 时间', key: 'initiator', width: 190, render: (_: unknown, item: GenerationJob) => `${item.initiator} · ${item.startedAt}` },
   ]
 
-  const contentTab = <div className="question-set-content-tab" data-sec="3"><div className="section-toolbar"><div><strong>题单内容</strong><span>共 {questions.length} 道题，按当前顺序展示</span></div><MetisButton onClick={() => MetisMessage.info('打开题库选题弹窗')}>＋ 添加题目</MetisButton></div><MetisTable<QuestionItem> rowKey="id" columns={questionColumns} dataSource={questions} pagination={false} /></div>
+  const contentTab = <div className="question-content-entry" data-sec="3"><div><span className="question-content-icon">题</span><div><strong>当前题单共 {record.questionCount} 道题</strong><p>进入题单编辑工作台，可从教材章节、练习册、试卷或其他题单中选题，并调整题目顺序。</p></div></div><MetisButton type="primary" onClick={() => navigate(`/assets/${record.id}/edit`)}>进入题单编辑</MetisButton></div>
   const operationTab = <div className="detail-section" data-sec="4"><div className="audit-list"><div><time>2026-10-21 17:46</time><strong>王晓慧编辑题单</strong><p>调整题目顺序，更新题单标签。</p></div><div><time>2026-10-20 16:08</time><strong>系统同步来源变化</strong><p>来源章节新增 3 题，更新题单内容。</p></div><div><time>2026-10-14 10:00</time><strong>赵琪关联教材目录</strong><p>关联至教材章节 {record.source.chapterIds.join('、') || '-'}。</p></div></div></div>
   const productionTab = <div className="detail-section" data-sec="5">{productionRows.length ? <MetisTable<GenerationJob> rowKey="id" columns={productionColumns} dataSource={productionRows} pagination={false} /> : <MetisEmpty description="暂无生产记录" />}</div>
 

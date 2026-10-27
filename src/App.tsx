@@ -4,6 +4,7 @@ import { CatalogBindingPage } from './pages/CatalogBindingPage'
 import { GenerationJobsPage } from './pages/GenerationJobsPage'
 import { GenerationRulesPage } from './pages/GenerationRulesPage'
 import { QuestionSetDetailPage } from './pages/QuestionSetDetailPage'
+import { QuestionSetEditorPage } from './pages/QuestionSetEditorPage'
 import { QuestionSetListPage } from './pages/QuestionSetListPage'
 
 export function App() {
@@ -11,6 +12,7 @@ export function App() {
     <AdminShell>
       <Routes>
         <Route path="/assets" element={<QuestionSetListPage />} />
+        <Route path="/assets/:id/edit" element={<QuestionSetEditorPage />} />
         <Route path="/assets/:id" element={<QuestionSetDetailPage />} />
         <Route path="/jobs" element={<GenerationJobsPage />} />
         <Route path="/catalogs" element={<CatalogBindingPage mode="textbook" />} />
