@@ -11,6 +11,7 @@ export interface TeachingScope {
   phase: string
   subject: string
   grade: string
+  semester?: string
   textbook: string
   volume: string
 }
@@ -122,6 +123,7 @@ export interface QuestionSetFilters {
   bindingStatus?: BindingStatus
   subject?: string
   grade?: string
+  semester?: string
   textbook?: string
   method?: ProductionMethod
   workbookId?: string

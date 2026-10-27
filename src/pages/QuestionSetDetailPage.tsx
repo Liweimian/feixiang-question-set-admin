@@ -12,6 +12,7 @@ export function QuestionSetDetailPage() {
   const [record, setRecord] = useState<QuestionSet>()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('content')
+  const [selectedQuestionId, setSelectedQuestionId] = useState(detailQuestions[0].id)
 
   useEffect(() => {
     setLoading(true)
@@ -32,24 +33,33 @@ export function QuestionSetDetailPage() {
     { title: '发起人 / 时间', key: 'initiator', width: 190, render: (_: unknown, item: GenerationJob) => `${item.initiator} · ${item.startedAt}` },
   ]
 
-  const contentTab = <div className="question-content-entry" data-sec="3"><div><span className="question-content-icon">题</span><div><strong>当前题单共 {record.questionCount} 道题</strong><p>进入题单编辑工作台，可从教材章节、练习册、试卷或其他题单中选题，并调整题目顺序。</p></div></div><MetisButton type="primary" onClick={() => navigate(`/assets/${record.id}/edit`)}>进入题单编辑</MetisButton></div>
+  const selectedQuestion = detailQuestions.find((item) => item.id === selectedQuestionId) ?? detailQuestions[0]
+  const questionGroups = Array.from(new Set(detailQuestions.map((item) => item.group)))
+  const contentTab = <div className="question-preview" data-sec="3">
+    <div className="question-preview-toolbar"><div><strong>题目列表</strong><span>共 {record.questionCount} 道题，当前展示 {detailQuestions.length} 道样例题</span></div><MetisButton type="primary" onClick={() => navigate(`/assets/${record.id}/edit`)}>编辑题单内容</MetisButton></div>
+    <div className="question-preview-layout">
+      <aside className="question-outline"><h3>题目排序</h3><p>点击题号定位题目</p>{questionGroups.map((group) => <section key={group}><strong>{group}</strong><div>{detailQuestions.filter((item) => item.group === group).map((item) => <button key={item.id} type="button" className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}>{item.order}</button>)}</div></section>)}</aside>
+      <section className="question-paper"><header><h2>{record.title}</h2><p>{record.scope.phase} · {record.scope.subject} · {record.scope.grade || '通用'} · 共 {record.questionCount} 题</p></header>{questionGroups.map((group) => <section key={group}><h3>{group}</h3>{detailQuestions.filter((item) => item.group === group).map((item) => <article key={item.id} className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><span>{item.order}.</span><p>{item.stem}</p></article>)}</section>)}</section>
+      <aside className="question-inspector"><h3>题目信息</h3><dl><div><dt>题目ID</dt><dd>{selectedQuestion.id}</dd></div><div><dt>题型</dt><dd>{selectedQuestion.type}</dd></div><div><dt>难度</dt><dd>{selectedQuestion.difficulty}</dd></div><div><dt>来源</dt><dd>{selectedQuestion.sourceModule}</dd></div><div><dt>题目版本</dt><dd>{selectedQuestion.revision}</dd></div></dl><section><strong>答案</strong><p>{selectedQuestion.type === '填空题' ? '0，0和1' : selectedQuestion.type === '解答题' ? '结合数轴分情况讨论。' : 'C'}</p></section><section><strong>解析</strong><p>本题用于考查算术平方根的概念与基本性质，需结合定义判断。</p></section></aside>
+    </div>
+  </div>
   const operationTab = <div className="detail-section" data-sec="4"><div className="audit-list"><div><time>2026-10-21 17:46</time><strong>王晓慧编辑题单</strong><p>调整题目顺序，更新题单标签。</p></div><div><time>2026-10-20 16:08</time><strong>系统同步来源变化</strong><p>来源章节新增 3 题，更新题单内容。</p></div><div><time>2026-10-14 10:00</time><strong>赵琪关联教材目录</strong><p>关联至教材章节 {record.source.chapterIds.join('、') || '-'}。</p></div></div></div>
   const productionTab = <div className="detail-section" data-sec="5">{productionRows.length ? <MetisTable<GenerationJob> rowKey="id" columns={productionColumns} dataSource={productionRows} pagination={false} /> : <MetisEmpty description="暂无生产记录" />}</div>
 
   return <div className="page-container question-set-detail-page">
     <header className="question-set-detail-banner" data-sec="1"><span className="breadcrumb">内容库 / 题单库 / 题单详情</span><div className="question-set-detail-title"><h1>{record.title}</h1><ContentStatusTag value={record.contentStatus} /></div></header>
+    <section className="question-set-detail-tabs"><MetisTabs activeKey={activeTab} onChange={setActiveTab} items={[{ key: 'content', label: '题单内容', children: contentTab }, { key: 'operations', label: '操作记录', children: operationTab }, { key: 'production', label: '生产记录', children: productionTab }]} /></section>
     <section className="question-set-basic-card" data-sec="2">
       <div className="question-set-basic-heading"><strong>基本信息</strong><MetisButton type="borderless" onClick={() => MetisMessage.info('编辑题单基本信息')}>编辑</MetisButton></div>
       <dl>
         <div><dt>题单ID</dt><dd>{record.id}</dd></div><div><dt>类型</dt><dd><TypeTag value={record.type} /></dd></div>
         <div><dt>题单名称</dt><dd>{record.title}</dd></div><div><dt>生产方式</dt><dd><MethodLabel value={record.method} /></dd></div>
-        <div><dt>阶段 / 科目</dt><dd>{record.scope.phase} / {record.scope.subject}</dd></div><div><dt>年级 / 册次</dt><dd>{record.scope.grade} / {record.scope.volume}</dd></div>
-        <div><dt>教材版本</dt><dd>{record.scope.textbook}</dd></div><div><dt>题量 / 建议时长</dt><dd>{record.questionCount} 题 / {record.duration} 分钟</dd></div>
+        <div><dt>阶段 / 科目</dt><dd>{record.scope.phase} / {record.scope.subject}</dd></div><div><dt>年级 / 学期</dt><dd>{record.type === 'topic' ? '-' : `${record.scope.grade} / ${record.scope.semester ?? record.scope.volume.replace('册', '学期')}`}</dd></div>
+        <div><dt>教材版本</dt><dd>{record.type === 'topic' ? '-' : record.scope.textbook}</dd></div><div><dt>题量 / 建议时长</dt><dd>{record.questionCount} 题 / {record.duration} 分钟</dd></div>
         <div><dt>综合难度</dt><dd>{record.difficulty}</dd></div><div><dt>负责人</dt><dd>{record.owner}</dd></div>
-        <div><dt>来源练习册</dt><dd>{record.source.workbookName ?? '-'}</dd></div><div><dt>来源章节</dt><dd>{record.source.chapterPath || '-'}</dd></div>
+        <div><dt>来源练习册</dt><dd>{record.source.workbookId ? <a className="table-link" href={`https://metis-gnosis.zhenguanyu.com/#/exercise-book/${record.source.workbookId}`} target="_blank" rel="noreferrer">{record.source.workbookName}</a> : '-'}</dd></div><div><dt>来源章节</dt><dd>{record.source.chapterPath || '-'}</dd></div>
         <div><dt>标签</dt><dd>{record.tags.join('、') || '-'}</dd></div><div><dt>更新时间</dt><dd>{record.updatedAt}</dd></div>
       </dl>
     </section>
-    <section className="question-set-detail-tabs"><MetisTabs activeKey={activeTab} onChange={setActiveTab} items={[{ key: 'content', label: '题单内容', children: contentTab }, { key: 'operations', label: '操作记录', children: operationTab }, { key: 'production', label: '生产记录', children: productionTab }]} /></section>
   </div>
 }

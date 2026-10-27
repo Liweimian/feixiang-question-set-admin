@@ -63,28 +63,16 @@ export function QuestionSetListPage() {
   }
 
   const columns = useMemo(() => [
-    {
-      title: '题单ID / 名称', dataIndex: 'title', key: 'title', width: 300,
-      render: (_: unknown, item: QuestionSet) => (
-        <div className="title-cell">
-          <div><button type="button" onClick={() => navigate(`/assets/${item.id}`)}>{item.title}</button></div>
-          <span>{item.id} · {item.tags.join(' / ')}</span>
-        </div>
-      ),
-    },
+    { title: '题单ID', dataIndex: 'id', key: 'id', width: 120, render: (value: string) => <button className="table-link" type="button" onClick={() => navigate(`/assets/${value}`)}>{value}</button> },
+    { title: '题单名称', dataIndex: 'title', key: 'title', width: 250, render: (value: string, item: QuestionSet) => <button className="table-link table-link-title" type="button" onClick={() => navigate(`/assets/${item.id}`)}>{value}</button> },
     { title: '类型', dataIndex: 'type', key: 'type', width: 110, render: (_: unknown, item: QuestionSet) => <TypeTag value={item.type} /> },
-    {
-      title: '阶段 / 科目 / 年级', key: 'scope', width: 170,
-      render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.scope.phase} · {item.scope.subject}</strong><span>{item.scope.grade} · {item.scope.volume}</span></div>,
-    },
-    {
-      title: '教材版本', key: 'textbook', width: 190,
-      render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.scope.textbook}</strong><span>{item.source.chapterPath}</span></div>,
-    },
-    {
-      title: '来源 / 生产方式', key: 'source', width: 175,
-      render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong><MethodLabel value={item.method} /></strong><span>{item.source.workbookId ? `练习册 ${item.source.workbookId}` : '无练习册来源'}</span></div>,
-    },
+    { title: '阶段', key: 'phase', width: 90, render: (_: unknown, item: QuestionSet) => item.scope.phase || '-' },
+    { title: '科目', key: 'subject', width: 90, render: (_: unknown, item: QuestionSet) => item.scope.subject || '-' },
+    { title: '年级', key: 'grade', width: 100, render: (_: unknown, item: QuestionSet) => item.type === 'topic' ? '-' : item.scope.grade || '-' },
+    { title: '学期', key: 'semester', width: 90, render: (_: unknown, item: QuestionSet) => item.scope.semester || (item.type === 'topic' ? '-' : item.scope.volume.replace('册', '学期')) },
+    { title: '教材版本', key: 'textbook', width: 170, render: (_: unknown, item: QuestionSet) => item.type === 'topic' ? '-' : item.scope.textbook || '-' },
+    { title: '生产方式', key: 'method', width: 120, render: (_: unknown, item: QuestionSet) => <MethodLabel value={item.method} /> },
+    { title: '来源', key: 'source', width: 210, render: (_: unknown, item: QuestionSet) => item.source.workbookId ? <a className="table-link" href={`https://metis-gnosis.zhenguanyu.com/#/exercise-book/${item.source.workbookId}`} target="_blank" rel="noreferrer">{item.source.workbookName ?? `练习册 ${item.source.workbookId}`}</a> : <span>{item.source.chapterPath || '人工创建'}</span> },
     {
       title: '题量', key: 'content', width: 95,
       render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.questionCount} 题</strong><span>{item.duration} 分钟 · {item.difficulty}</span></div>,
@@ -101,7 +89,7 @@ export function QuestionSetListPage() {
     },
     {
       title: '操作', key: 'actions', fixed: 'right' as const, width: 145,
-      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>编辑</MetisButton><MetisButton type="borderless" onClick={() => MetisMessage.info(`预览 ${item.title}`)}>预览</MetisButton></div>,
+      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}/edit`)}>编辑</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>查看</MetisButton></div>,
     },
   ], [navigate])
 
@@ -131,6 +119,7 @@ export function QuestionSetListPage() {
           <FilterField label="阶段"><MetisSelect allowClear value={query.filters.phase} placeholder="全部阶段" options={[{label:'小学',value:'小学'},{label:'初中',value:'初中'},{label:'高中',value:'高中'}]} onChange={(value) => updateFilters({ phase: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="科目"><MetisSelect allowClear value={query.filters.subject} placeholder="全部科目" options={[{label:'语文',value:'语文'},{label:'数学',value:'数学'},{label:'英语',value:'英语'},{label:'物理',value:'物理'}]} onChange={(value) => updateFilters({ subject: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="年级"><MetisSelect allowClear value={query.filters.grade} placeholder="全部年级" options={[{label:'七年级',value:'七年级'},{label:'八年级',value:'八年级'},{label:'九年级',value:'九年级'}]} onChange={(value) => updateFilters({ grade: value ? String(value) : undefined })} /></FilterField>
+          <FilterField label="学期"><MetisSelect allowClear value={query.filters.semester} placeholder="全部学期" options={[{label:'上学期',value:'上学期'},{label:'下学期',value:'下学期'}]} onChange={(value) => updateFilters({ semester: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="教材版本"><MetisSelect allowClear value={query.filters.textbook} placeholder="全部教材版本" options={[{label:'沪教版(五四制)',value:'沪教版'},{label:'统编版',value:'统编版'},{label:'多版本/通用',value:'多版本'}]} onChange={(value) => updateFilters({ textbook: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="生产方式"><MetisSelect allowClear value={query.filters.method} placeholder="全部生产方式" options={[{label:'练习册生成',value:'workbook'},{label:'人工组题',value:'manual'},{label:'规则生成',value:'rule'}]} onChange={(value) => updateFilters({ method: value as ProductionMethod | undefined })} /></FilterField>
           <FilterField label="来源练习册ID"><MetisInput value={query.filters.workbookId} placeholder="请输入练习册ID" onChange={(event) => updateFilters({ workbookId: event.target.value })} /></FilterField>
@@ -159,7 +148,7 @@ export function QuestionSetListPage() {
             loading={status === 'loading'}
             columns={columns}
             dataSource={result.items}
-            scroll={{ x: 1620 }}
+            scroll={{ x: 2050 }}
             rowSelection={{ selectedRowKeys: selectedKeys, onChange: (keys: Key[]) => setSelectedKeys(keys) }}
             pagination={{ current: query.page, pageSize: query.pageSize, total: result.total, onChange: (page: number, pageSize: number) => setQuery((current) => ({ ...current, page, pageSize })) }}
           />
