@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
-import { MetisButton, MetisEmpty, MetisInput, MetisMessage, MetisSelect, MetisTabs, MetisTag } from '@yuanfudao/metis-web-component'
-import { useNavigate, useParams } from 'react-router-dom'
+import { MetisButton, MetisEmpty, MetisInput, MetisMessage, MetisSelect, MetisTable, MetisTabs, MetisTag } from '@yuanfudao/metis-web-component'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ContentStatusTag, MethodLabel, TypeTag } from '../components/StatusTags'
-import { detailQuestions } from '../data/mockData'
-import type { QuestionSet } from '../features/question-sets/types'
+import { detailQuestions, generationJobs } from '../data/mockData'
+import type { GenerationJob, QuestionSet } from '../features/question-sets/types'
 import { questionSetRepository } from '../services/questionSetRepository'
 
 export function QuestionSetDetailPage() {
   const navigate = useNavigate()
   const { id = 'QS-10458' } = useParams()
+  const [searchParams] = useSearchParams()
   const [record, setRecord] = useState<QuestionSet>()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('content')
@@ -19,8 +20,24 @@ export function QuestionSetDetailPage() {
     void questionSetRepository.get(id).then((item) => { setRecord(item); setLoading(false) })
   }, [id])
 
+  useEffect(() => {
+    const requestedTab = searchParams.get('tab')
+    if (requestedTab === 'operations' || requestedTab === 'production') setActiveTab(requestedTab)
+  }, [searchParams])
+
   if (loading) return <div className="page-container"><div className="loading-card">正在加载题单…</div></div>
   if (!record) return <div className="page-container"><div className="feedback-state"><MetisEmpty description="未找到该题单" /><MetisButton onClick={() => navigate('/assets')}>返回题单库</MetisButton></div></div>
+
+  const matchedProductionRows = generationJobs.filter((job) => !record.source.workbookId || job.workbookId === record.source.workbookId)
+  const productionRows: GenerationJob[] = matchedProductionRows.length ? matchedProductionRows : [{ id: 'JOB-20261014-8554', trigger: '自动事件', workbook: record.source.workbookName ?? '人工组题', workbookId: record.source.workbookId ?? '-', ruleVersion: record.source.ruleVersion ?? '-', eligible: 1, created: 1, updated: 0, skipped: 0, conflict: 0, failed: 0, status: 'success', startedAt: '2026-10-14 09:42', duration: '18秒', initiator: '系统' }]
+  const productionColumns = [
+    { title: '生产记录ID', dataIndex: 'id', key: 'id', width: 190 },
+    { title: '触发方式', dataIndex: 'trigger', key: 'trigger', width: 130 },
+    { title: '来源练习册', key: 'workbook', render: (_: unknown, item: GenerationJob) => <div className="stacked-cell"><strong>{item.workbook}</strong><span>{item.workbookId}</span></div> },
+    { title: '生成规则', dataIndex: 'ruleVersion', key: 'ruleVersion', width: 130 },
+    { title: '状态', dataIndex: 'status', key: 'status', width: 110, render: (value: GenerationJob['status']) => <MetisTag color={value === 'success' ? 'success' : value === 'failed' ? 'error' : 'warning'}>{value === 'success' ? '成功' : value === 'failed' ? '失败' : value === 'running' ? '生成中' : '部分成功'}</MetisTag> },
+    { title: '发起人 / 时间', key: 'initiator', width: 190, render: (_: unknown, item: GenerationJob) => `${item.initiator} · ${item.startedAt}` },
+  ]
 
   const questionGroups = Array.from(new Set(detailQuestions.map((item) => item.group)))
   const listContentView = <div className="question-management-view">
@@ -37,6 +54,8 @@ export function QuestionSetDetailPage() {
   </div>
 
   const contentTab = <div data-sec="3">{listContentView}</div>
+  const operationTab = <div className="detail-section" data-sec="4"><div className="audit-list"><div><time>2026-10-21 17:46</time><strong>王晓慧编辑题单</strong><p>调整题目顺序，更新题单标签。</p></div><div><time>2026-10-20 16:08</time><strong>系统同步来源变化</strong><p>来源章节新增 3 题，更新题单内容。</p></div><div><time>2026-10-14 10:00</time><strong>赵琪关联教材目录</strong><p>关联至教材章节 {record.source.chapterIds.join('、') || '-'}。</p></div></div></div>
+  const productionTab = <div className="detail-section" data-sec="5">{productionRows.length ? <MetisTable<GenerationJob> rowKey="id" columns={productionColumns} dataSource={productionRows} pagination={false} /> : <MetisEmpty description="暂无生产记录" />}</div>
   return <div className="page-container question-set-detail-page">
     <header className="question-set-detail-banner" data-sec="1"><span className="breadcrumb">内容库 / 题单库 / 题单详情</span><div className="question-set-detail-title"><h1>{record.title}</h1><ContentStatusTag value={record.contentStatus} /></div></header>
     <section className="question-set-basic-card" data-sec="2">
@@ -50,6 +69,6 @@ export function QuestionSetDetailPage() {
         <div className="question-set-tags-row"><dt>标签</dt><dd>{[...record.tags, record.difficulty].filter(Boolean).map((tag) => <MetisTag key={tag}>{tag}</MetisTag>)}</dd></div>
       </dl>
     </section>
-    <section className="question-set-detail-tabs"><MetisTabs activeKey={activeTab} onChange={setActiveTab} items={[{ key: 'content', label: `题目（${record.questionCount}）`, children: contentTab }]} /></section>
+    <section className="question-set-detail-tabs"><MetisTabs activeKey={activeTab} onChange={setActiveTab} items={[{ key: 'content', label: `题目（${record.questionCount}）`, children: contentTab }, { key: 'operations', label: '操作记录', children: operationTab }, { key: 'production', label: '生产记录', children: productionTab }]} /></section>
   </div>
 }

@@ -4,7 +4,7 @@ export type QuestionSetType = 'sync' | 'topic' | 'custom'
 export type ProductionMethod = 'workbook' | 'manual' | 'rule'
 export type ContentStatus = 'draft' | 'review' | 'ready' | 'published' | 'offline'
 export type SyncStatus = 'synced' | 'changed' | 'conflict' | 'locked' | 'invalid' | 'none'
-export type BindingStatus = 'bound' | 'pending' | 'partial' | 'invalid'
+export type BindingStatus = 'bound' | 'unbound'
 export type SyncPolicy = 'merge' | 'follow' | 'lock'
 
 export interface TeachingScope {

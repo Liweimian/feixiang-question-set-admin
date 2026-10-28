@@ -26,9 +26,7 @@ const syncMeta: Record<SyncStatus, { label: string; color: string }> = {
 
 const bindingMeta: Record<BindingStatus, { label: string; color: string }> = {
   bound: { label: '已关联', color: 'success' },
-  pending: { label: '待关联', color: 'warning' },
-  partial: { label: '部分关联', color: 'processing' },
-  invalid: { label: '关联失效', color: 'error' },
+  unbound: { label: '未关联', color: 'default' },
 }
 
 const typeMeta: Record<QuestionSetType, string> = {

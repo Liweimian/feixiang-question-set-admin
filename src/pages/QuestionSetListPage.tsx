@@ -80,8 +80,8 @@ export function QuestionSetListPage() {
     { title: '创建时间', dataIndex: 'updatedAt', key: 'createdAt', width: 160 },
     { title: '创建人', dataIndex: 'owner', key: 'creator', width: 100 },
     {
-      title: '操作', key: 'actions', fixed: 'right' as const, width: 170,
-      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => { const nextStatus = item.contentStatus === 'published' ? 'offline' : 'published'; setResult((current) => ({ ...current, items: current.items.map((row) => row.id === item.id ? { ...row, contentStatus: nextStatus } : row) })); MetisMessage.success(item.contentStatus === 'published' ? '题单已下线' : '题单已上线') }}>{item.contentStatus === 'published' ? '下线' : '上线'}</MetisButton></div>,
+      title: '操作', key: 'actions', fixed: 'right' as const, width: 310,
+      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => { const nextStatus = item.contentStatus === 'published' ? 'offline' : 'published'; setResult((current) => ({ ...current, items: current.items.map((row) => row.id === item.id ? { ...row, contentStatus: nextStatus } : row) })); MetisMessage.success(item.contentStatus === 'published' ? '题单已下线' : '题单已上线') }}>状态控制</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}?tab=operations`)}>操作记录</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}?tab=production`)}>生产记录</MetisButton><MetisButton type="borderless" onClick={() => { setResult((current) => ({ ...current, total: Math.max(0, current.total - 1), items: current.items.filter((row) => row.id !== item.id) })); MetisMessage.success(`已删除题单 ${item.id}`) }}>删除</MetisButton></div>,
     },
   ], [navigate])
 
@@ -114,8 +114,8 @@ export function QuestionSetListPage() {
           <FilterField label="生产方式"><MetisSelect allowClear value={query.filters.method} placeholder="全部生产方式" options={[{label:'练习册生成',value:'workbook'},{label:'人工组题',value:'manual'},{label:'规则生成',value:'rule'}]} onChange={(value) => updateFilters({ method: value as ProductionMethod | undefined })} /></FilterField>
           <FilterField label="来源练习册ID"><MetisInput value={query.filters.workbookId} placeholder="请输入练习册ID" onChange={(event) => updateFilters({ workbookId: event.target.value })} /></FilterField>
           {expandedFilters && <>
-            <FilterField label="内容状态"><MetisSelect allowClear value={query.filters.contentStatus} placeholder="全部内容状态" options={[{label:'草稿',value:'draft'},{label:'已上线',value:'published'},{label:'已下线',value:'offline'}]} onChange={(value) => updateFilters({ contentStatus: value as ContentStatus | undefined })} /></FilterField>
-            <FilterField label="目录关联"><MetisSelect allowClear value={query.filters.bindingStatus} placeholder="全部关联状态" options={[{label:'已关联',value:'bound'},{label:'待关联',value:'pending'},{label:'部分关联',value:'partial'},{label:'关联失效',value:'invalid'}]} onChange={(value) => updateFilters({ bindingStatus: value as BindingStatus | undefined })} /></FilterField>
+            <FilterField label="状态"><MetisSelect allowClear value={query.filters.contentStatus} placeholder="全部状态" options={[{label:'草稿',value:'draft'},{label:'已上线',value:'published'},{label:'已下线',value:'offline'}]} onChange={(value) => updateFilters({ contentStatus: value as ContentStatus | undefined })} /></FilterField>
+            <FilterField label="目录关联"><MetisSelect allowClear value={query.filters.bindingStatus} placeholder="全部关联状态" options={[{label:'已关联',value:'bound'},{label:'未关联',value:'unbound'}]} onChange={(value) => updateFilters({ bindingStatus: value as BindingStatus | undefined })} /></FilterField>
           </>}
         </div>
         <div className="filter-actions"><MetisButton onClick={() => setQuery(initialQuery)}>重置</MetisButton><MetisButton type="primary" onClick={() => void load()}>搜索</MetisButton></div>
@@ -136,7 +136,7 @@ export function QuestionSetListPage() {
             loading={status === 'loading'}
             columns={columns}
             dataSource={result.items}
-            scroll={{ x: 1950 }}
+            scroll={{ x: 2100 }}
             rowSelection={{ selectedRowKeys: selectedKeys, onChange: (keys: Key[]) => setSelectedKeys(keys) }}
             pagination={{ current: query.page, pageSize: query.pageSize, total: result.total, onChange: (page: number, pageSize: number) => setQuery((current) => ({ ...current, page, pageSize })) }}
           />
