@@ -1,25 +1,14 @@
 import type { PropsWithChildren } from 'react'
 import { useMemo, useState } from 'react'
-import { MetisButton, MetisMessage } from '@yuanfudao/metis-web-component'
+import { MetisButton } from '@yuanfudao/metis-web-component'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 const navItems: Array<{ path?: string; label: string }> = [
-  { label: '题目' },
-  { label: '标签管理' },
-  { label: '知识点' },
   { path: '/catalogs', label: '教材目录' },
   { path: '/topic-tree', label: '专题树' },
-  { label: '主题' },
-  { label: '策略' },
-  { label: '技能' },
-  { label: '词汇' },
-  { label: '核心素养' },
-  { label: '业务标签' },
   { label: '练习册' },
   { label: '试卷' },
   { path: '/assets', label: '题单库' },
-  { label: '作文素材' },
-  { label: '书城' },
 ]
 
 export function AdminShell({ children }: PropsWithChildren) {
@@ -73,7 +62,6 @@ export function AdminShell({ children }: PropsWithChildren) {
                       onClick={() => {
                         setLibraryMenuOpen(false)
                         if (item.path) navigate(item.path)
-                        else MetisMessage.info(`${item.label}为现有内容库页面，本原型不展开`)
                       }}
                     >
                       {item.label}
