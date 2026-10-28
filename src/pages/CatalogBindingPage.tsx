@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   MetisButton,
-  MetisCheckbox,
   MetisDialog,
   MetisInput,
   MetisMessage,
-  MetisRadio,
   MetisSelect,
   MetisTable,
   MetisTabs,
@@ -254,11 +252,11 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
             <MetisTable<CatalogBinding> rowKey="id" columns={textbookQuestionSetColumns} dataSource={bindings} pagination={false} />
           </div> : <div className="relation-panel">
             {relationTab === 'question' && <div className="question-relation-filters">
-              <div><strong>状态</strong><MetisRadio.Group defaultValue="all" options={[{ label: '全部', value: 'all' }, { label: '上线', value: 'online' }, { label: '下线', value: 'offline' }]} /></div>
-              <div><strong>来源</strong><MetisRadio.Group defaultValue="all" options={[{ label: '全部', value: 'all' }, { label: 'tarzan', value: 'tarzan' }, { label: '口算知识应用', value: 'mental' }, { label: 'cyber', value: 'cyber' }, { label: '原创', value: 'original' }, { label: '后台', value: 'backend' }, { label: '任务平台', value: 'task' }, { label: 'XES', value: 'xes' }, { label: '自动出题（原创）', value: 'auto' }, { label: '菁优网', value: 'jyeoo' }, { label: '教师工作台', value: 'teacher' }]} /></div>
-              <div><strong>题目分层</strong><MetisCheckbox.Group defaultValue={[]} options={[{ label: '全选', value: 'all' }, { label: 'A', value: 'A' }, { label: 'B', value: 'B' }, { label: 'C', value: 'C' }, { label: 'D', value: 'D' }]} /></div>
-              <div><strong>可见资源库</strong><MetisSelect allowClear placeholder="请选择资源库" options={[{ label: '飞象公共库', value: 'public' }, { label: '校本资源库', value: 'school' }, { label: '区域资源库', value: 'region' }]} /></div>
-              <div><strong>难度</strong><MetisCheckbox.Group defaultValue={[]} options={[{ label: '全选', value: 'all' }, { label: '容易', value: 'easy' }, { label: '较易', value: 'easier' }, { label: '中等', value: 'medium' }, { label: '较难', value: 'harder' }, { label: '困难', value: 'hard' }]} /></div>
+              <label><strong>状态</strong><MetisSelect allowClear placeholder="全部状态" options={[{ label: '上线', value: 'online' }, { label: '下线', value: 'offline' }]} /></label>
+              <label><strong>来源</strong><MetisSelect allowClear placeholder="全部来源" options={[{ label: 'tarzan', value: 'tarzan' }, { label: '口算知识应用', value: 'mental' }, { label: 'cyber', value: 'cyber' }, { label: '原创', value: 'original' }, { label: '后台', value: 'backend' }, { label: '任务平台', value: 'task' }, { label: 'XES', value: 'xes' }, { label: '自动出题（原创）', value: 'auto' }, { label: '菁优网', value: 'jyeoo' }, { label: '教师工作台', value: 'teacher' }]} /></label>
+              <label><strong>题目分层</strong><MetisSelect allowClear placeholder="全部分层" options={[{ label: 'A', value: 'A' }, { label: 'B', value: 'B' }, { label: 'C', value: 'C' }, { label: 'D', value: 'D' }]} /></label>
+              <label><strong>可见资源库</strong><MetisSelect allowClear placeholder="全部资源库" options={[{ label: '飞象公共库', value: 'public' }, { label: '校本资源库', value: 'school' }, { label: '区域资源库', value: 'region' }]} /></label>
+              <label><strong>难度</strong><MetisSelect allowClear placeholder="全部难度" options={[{ label: '容易', value: 'easy' }, { label: '较易', value: 'easier' }, { label: '中等', value: 'medium' }, { label: '较难', value: 'harder' }, { label: '困难', value: 'hard' }]} /></label>
             </div>}
             <div className="relation-toolbar"><div><strong>已关联{relationLabel}</strong><span>关联关系仅作用于当前目录节点</span></div><div><MetisInput placeholder={`按${relationLabel}名称或ID搜索`} /><MetisButton>搜索</MetisButton></div></div>
             <MetisTable<RelatedResource> rowKey="id" columns={resourceColumns} dataSource={resourcesByTab[relationTab]} pagination={false} />
