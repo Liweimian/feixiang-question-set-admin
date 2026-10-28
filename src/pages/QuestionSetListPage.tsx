@@ -95,7 +95,7 @@ export function QuestionSetListPage() {
         </div>
         <div className="heading-actions">
           <MetisButton onClick={() => MetisMessage.info('打开纯人工组题流程')}>新建题单</MetisButton>
-          <MetisButton type="primary" data-track="/click/questionSetList/generateFromWorkbook | 从练习册生成题单 | 无" onClick={() => setDialogOpen(true)}>从练习册生成</MetisButton>
+          <MetisButton type="primary" data-track="/click/questionSetList/batchGenerate | 批量生成题单 | 无" onClick={() => setDialogOpen(true)}>批量生成题单</MetisButton>
         </div>
       </header>
 
@@ -141,7 +141,7 @@ export function QuestionSetListPage() {
         )}
       </section>
 
-      <GenerateQuestionSetDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onGenerated={() => navigate('/jobs')} />
+      <GenerateQuestionSetDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onGenerated={() => void load()} />
     </div>
   )
 }
