@@ -13,7 +13,6 @@ export function QuestionSetDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('content')
   const [selectedQuestionId, setSelectedQuestionId] = useState(detailQuestions[0].id)
-  const [contentMode, setContentMode] = useState<'list' | 'edit'>('list')
 
   useEffect(() => {
     setLoading(true)
@@ -34,27 +33,21 @@ export function QuestionSetDetailPage() {
     { title: '发起人 / 时间', key: 'initiator', width: 190, render: (_: unknown, item: GenerationJob) => `${item.initiator} · ${item.startedAt}` },
   ]
 
-  const selectedQuestion = detailQuestions.find((item) => item.id === selectedQuestionId) ?? detailQuestions[0]
   const questionGroups = Array.from(new Set(detailQuestions.map((item) => item.group)))
-  const editContentView = <div className="question-preview">
-    <div className="question-preview-toolbar"><div><strong>编辑题单内容</strong><span>点击题号定位题目，可查看题目详情并调整整套题单</span></div><div><MetisButton onClick={() => MetisMessage.info('打开关联题目弹窗')}>添加题目</MetisButton><MetisButton type="primary" onClick={() => { setContentMode('list'); MetisMessage.success('题单内容已保存') }}>保存并退出编辑</MetisButton></div></div>
-    <div className="question-preview-layout">
-      <aside className="question-outline"><h3>题目排序</h3><p>点击题号定位题目</p>{questionGroups.map((group) => <section key={group}><strong>{group}</strong><div>{detailQuestions.filter((item) => item.group === group).map((item) => <button key={item.id} type="button" className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}>{item.order}</button>)}</div></section>)}</aside>
-      <section className="question-paper"><header><h2>{record.title}</h2><p>{record.scope.phase} · {record.scope.subject} · {record.scope.grade || '通用'} · 共 {record.questionCount} 题</p></header>{questionGroups.map((group) => <section key={group}><h3>{group}</h3>{detailQuestions.filter((item) => item.group === group).map((item) => <article key={item.id} className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><span>{item.order}.</span><p>{item.stem}</p></article>)}</section>)}</section>
-      <aside className="question-inspector"><h3>题目信息</h3><dl><div><dt>题目ID</dt><dd>{selectedQuestion.id}</dd></div><div><dt>题型</dt><dd>{selectedQuestion.type}</dd></div><div><dt>难度</dt><dd>{selectedQuestion.difficulty}</dd></div><div><dt>来源</dt><dd>{selectedQuestion.sourceModule}</dd></div><div><dt>题目版本</dt><dd>{selectedQuestion.revision}</dd></div></dl><section><strong>答案</strong><p>{selectedQuestion.type === '填空题' ? '0，0和1' : selectedQuestion.type === '解答题' ? '结合数轴分情况讨论。' : 'C'}</p></section><section><strong>解析</strong><p>本题用于考查算术平方根的概念与基本性质，需结合定义判断。</p></section></aside>
-    </div>
-  </div>
-
   const listContentView = <div className="question-management-view">
-    <div className="question-management-heading"><div><strong>题目列表</strong><span>共 {record.questionCount} 道题，当前展示 {detailQuestions.length} 道样例题</span></div><MetisButton type="primary" onClick={() => setContentMode('edit')}>编辑题单内容</MetisButton></div>
-    <div className="question-management-filters"><span>模块设置：</span><MetisSelect value="none" disabled options={[{ label: '无模块', value: 'none' }]} /><MetisSelect value="group" options={[{ label: '大题参与编号', value: 'group' }]} /><span>题目ID：</span><MetisInput placeholder="请输入ID，多个换行分割" /><span>题目生产状态：</span><MetisSelect value="all" options={[{ label: '全部', value: 'all' }, { label: '上线', value: 'online' }]} /><MetisButton type="primary">查询</MetisButton><MetisButton>重置</MetisButton></div>
     <div className="question-management-layout">
-      <aside className="question-order-panel"><header><strong>排序/分值</strong><div><button type="button">导出</button><button type="button" onClick={() => MetisMessage.info('打开关联题目弹窗')}>＋关联题目</button></div></header>{detailQuestions.map((item) => <button key={item.id} type="button" className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><span>{item.order}、{item.id}</span><MetisTag color={item.quality === 'warning' ? 'warning' : 'success'}>{item.quality === 'warning' ? '待检查' : '上线'}</MetisTag><small>0.00分</small></button>)}</aside>
-      <section className="question-card-list">{detailQuestions.map((item) => <article key={item.id} className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><header><button className="table-link table-link-title" type="button">{item.id}</button><MetisTag color="success">上线</MetisTag><strong>{item.type}</strong><span>来源：{item.origin === 'source' ? '练习册' : '人工添加'}</span><span>题目版本：{item.revision}</span></header><div className="question-card-meta"><span>出处：{item.sourceModule}</span><span>难度：{item.difficulty}</span><span>题目分层：{item.group}</span></div><div className="question-card-tags"><MetisTag>有解析</MetisTag><MetisTag>有答案</MetisTag><MetisTag>有难度</MetisTag><MetisTag>有学科题型</MetisTag></div><p><strong>{item.order}.</strong> {item.stem}</p></article>)}</section>
+      <div className="question-management-left">
+        <div className="question-module-toolbar"><span>模块设置：</span><MetisSelect value="group" disabled options={[{ label: '有模块', value: 'group' }]} /></div>
+        <aside className="question-order-panel"><header><strong>排序/分值</strong><div><button type="button">导出</button><button type="button" onClick={() => MetisMessage.info('打开关联题目弹窗')}>＋新建模块</button></div></header>{questionGroups.map((group) => <section key={group} className="question-order-group"><header><strong>▾　{group}</strong><button type="button" onClick={() => MetisMessage.info(`向${group}关联题目`)}>＋关联题目</button></header>{detailQuestions.filter((item) => item.group === group).map((item) => <button key={item.id} type="button" className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><span>{item.order}、{item.id}</span><MetisTag color={item.quality === 'warning' ? 'warning' : 'success'}>{item.quality === 'warning' ? '待检查' : '上线'}</MetisTag><small>0.00分</small><em>移出</em></button>)}</section>)}</aside>
+      </div>
+      <div className="question-management-right">
+        <div className="question-management-filters"><span>题目ID：</span><MetisInput placeholder="请输入ID，多个换行分割" /><span>题目生产状态：</span><MetisSelect value="all" options={[{ label: '全部', value: 'all' }, { label: '上线', value: 'online' }]} /><MetisButton type="primary">查询</MetisButton><MetisButton>重置</MetisButton></div>
+        <section className="question-card-list">{detailQuestions.map((item) => <article key={item.id} className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><header><button className="table-link table-link-title" type="button">{item.id}</button><MetisTag color="success">上线</MetisTag><strong>{item.type}</strong><span>来源：{item.origin === 'source' ? '练习册' : '人工添加'}</span><span>题目版本：{item.revision}</span></header><div className="question-card-meta"><span>出处：{item.sourceModule}</span><span>难度：{item.difficulty}</span><span>题目分层：{item.group}</span></div><div className="question-card-tags"><MetisTag>有解析</MetisTag><MetisTag>有答案</MetisTag><MetisTag>有难度</MetisTag><MetisTag>有学科题型</MetisTag></div><p><strong>{item.order}.</strong> {item.stem}</p></article>)}</section>
+      </div>
     </div>
   </div>
 
-  const contentTab = <div data-sec="3">{contentMode === 'list' ? listContentView : editContentView}</div>
+  const contentTab = <div data-sec="3">{listContentView}</div>
   const operationTab = <div className="detail-section" data-sec="4"><div className="audit-list"><div><time>2026-10-21 17:46</time><strong>王晓慧编辑题单</strong><p>调整题目顺序，更新题单标签。</p></div><div><time>2026-10-20 16:08</time><strong>系统同步来源变化</strong><p>来源章节新增 3 题，更新题单内容。</p></div><div><time>2026-10-14 10:00</time><strong>赵琪关联教材目录</strong><p>关联至教材章节 {record.source.chapterIds.join('、') || '-'}。</p></div></div></div>
   const productionTab = <div className="detail-section" data-sec="5">{productionRows.length ? <MetisTable<GenerationJob> rowKey="id" columns={productionColumns} dataSource={productionRows} pagination={false} /> : <MetisEmpty description="暂无生产记录" />}</div>
 
@@ -72,6 +65,6 @@ export function QuestionSetDetailPage() {
         <div><dt>标签</dt><dd>{record.tags.join('、') || '-'}</dd></div><div><dt>更新时间</dt><dd>{record.updatedAt}</dd></div>
       </dl>
     </section>
-    <section className="question-set-detail-tabs"><MetisTabs activeKey={activeTab} onChange={setActiveTab} items={[{ key: 'content', label: `题单内容（${record.questionCount}）`, children: contentTab }, { key: 'operations', label: '操作记录', children: operationTab }, { key: 'production', label: '生产记录', children: productionTab }]} /></section>
+    <section className="question-set-detail-tabs"><MetisTabs activeKey={activeTab} onChange={setActiveTab} items={[{ key: 'content', label: `题目（${record.questionCount}）`, children: contentTab }, { key: 'operations', label: '操作记录', children: operationTab }, { key: 'production', label: '生产记录', children: productionTab }]} /></section>
   </div>
 }
