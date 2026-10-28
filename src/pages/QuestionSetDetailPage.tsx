@@ -59,10 +59,9 @@ export function QuestionSetDetailPage() {
         <div><dt>题单ID</dt><dd>{record.id}</dd></div><div><dt>类型</dt><dd><TypeTag value={record.type} /></dd></div>
         <div><dt>题单名称</dt><dd>{record.title}</dd></div><div><dt>生产方式</dt><dd><MethodLabel value={record.method} /></dd></div>
         <div><dt>阶段 / 科目</dt><dd>{record.scope.phase} / {record.scope.subject}</dd></div><div><dt>年级 / 学期</dt><dd>{record.type === 'topic' ? '-' : `${record.scope.grade} / ${record.scope.semester ?? record.scope.volume.replace('册', '学期')}`}</dd></div>
-        <div><dt>教材版本</dt><dd>{record.type === 'topic' ? '-' : record.scope.textbook}</dd></div><div><dt>题量 / 建议时长</dt><dd>{record.questionCount} 题 / {record.duration} 分钟</dd></div>
-        <div><dt>综合难度</dt><dd>{record.difficulty}</dd></div><div><dt>负责人</dt><dd>{record.owner}</dd></div>
+        <div><dt>教材版本</dt><dd>{record.type === 'topic' ? '-' : record.scope.textbook}</dd></div>
         <div><dt>来源练习册</dt><dd>{record.source.workbookId ? <a className="table-link" href={`https://metis-gnosis.zhenguanyu.com/#/exercise-book/${record.source.workbookId}`} target="_blank" rel="noreferrer">{record.source.workbookName}</a> : '-'}</dd></div><div><dt>来源章节</dt><dd>{record.source.chapterPath || '-'}</dd></div>
-        <div><dt>标签</dt><dd>{record.tags.join('、') || '-'}</dd></div><div><dt>更新时间</dt><dd>{record.updatedAt}</dd></div>
+        <div className="question-set-tags-row"><dt>标签</dt><dd>{[...record.tags, record.difficulty].filter(Boolean).map((tag) => <MetisTag key={tag}>{tag}</MetisTag>)}</dd></div>
       </dl>
     </section>
     <section className="question-set-detail-tabs"><MetisTabs activeKey={activeTab} onChange={setActiveTab} items={[{ key: 'content', label: `题目（${record.questionCount}）`, children: contentTab }, { key: 'operations', label: '操作记录', children: operationTab }, { key: 'production', label: '生产记录', children: productionTab }]} /></section>
