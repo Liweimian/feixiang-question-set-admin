@@ -11,6 +11,7 @@ export function App() {
     <AdminShell>
       <Routes>
         <Route path="/assets" element={<QuestionSetListPage />} />
+        <Route path="/assets/:id/edit" element={<Navigate to=".." relative="path" replace />} />
         <Route path="/assets/:id" element={<QuestionSetDetailPage />} />
         <Route path="/jobs" element={<GenerationJobsPage />} />
         <Route path="/catalogs" element={<CatalogBindingPage mode="textbook" />} />
