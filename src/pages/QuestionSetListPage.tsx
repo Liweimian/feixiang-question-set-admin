@@ -126,8 +126,6 @@ export function QuestionSetListPage() {
           <div><strong>题单列表</strong><span>当前筛选共 {result.total} 条</span></div>
           <div className="toolbar-actions">
             {selectedKeys.length > 0 && <MetisTag color="processing">已选 {selectedKeys.length} 项</MetisTag>}
-            <MetisButton disabled={!selectedKeys.length} onClick={() => navigate('/catalogs')}>批量关联目录</MetisButton>
-            <MetisButton disabled={!selectedKeys.length} onClick={() => MetisMessage.info('打开批量标签操作')}>批量打标签</MetisButton>
           </div>
         </div>
         {status === 'error' ? <div className="feedback-state"><MetisEmpty description="题单加载失败" /><MetisButton onClick={() => void load()}>重新加载</MetisButton></div> : (
