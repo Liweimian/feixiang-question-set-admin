@@ -15,7 +15,6 @@ import {
   BindingStatusTag,
   ContentStatusTag,
   MethodLabel,
-  SyncStatusTag,
   TypeTag,
 } from '../components/StatusTags'
 import type {
@@ -25,7 +24,6 @@ import type {
   QuestionSet,
   QuestionSetFilters,
   QuestionSetType,
-  SyncStatus,
 } from '../features/question-sets/types'
 import type { AsyncStatus, PageQuery, PageResult } from '../prototype/types'
 import { questionSetRepository } from '../services/questionSetRepository'
@@ -77,19 +75,13 @@ export function QuestionSetListPage() {
       title: '题量', key: 'content', width: 95,
       render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.questionCount} 题</strong><span>{item.duration} 分钟 · {item.difficulty}</span></div>,
     },
-    {
-      title: '上游同步', dataIndex: 'syncStatus', key: 'syncStatus', width: 138,
-      render: (_: unknown, item: QuestionSet) => <div className="status-cell"><SyncStatusTag value={item.syncStatus} />{item.diff && <small>+{item.diff.added} / −{item.diff.removed} / 改{item.diff.updated}</small>}</div>,
-    },
     { title: '目录关联', dataIndex: 'bindingStatus', key: 'bindingStatus', width: 105, render: (_: unknown, item: QuestionSet) => <BindingStatusTag value={item.bindingStatus} /> },
     { title: '状态', dataIndex: 'contentStatus', key: 'contentStatus', width: 95, render: (_: unknown, item: QuestionSet) => <ContentStatusTag value={item.contentStatus} /> },
+    { title: '创建时间', dataIndex: 'updatedAt', key: 'createdAt', width: 160 },
+    { title: '创建人', dataIndex: 'owner', key: 'creator', width: 100 },
     {
-      title: '更新人 / 时间', key: 'updatedAt', width: 145,
-      render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><strong>{item.owner}</strong><span>{item.updatedAt}</span></div>,
-    },
-    {
-      title: '操作', key: 'actions', fixed: 'right' as const, width: 145,
-      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>编辑</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>查看</MetisButton></div>,
+      title: '操作', key: 'actions', fixed: 'right' as const, width: 170,
+      render: (_: unknown, item: QuestionSet) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => { const nextStatus = item.contentStatus === 'published' ? 'offline' : 'published'; setResult((current) => ({ ...current, items: current.items.map((row) => row.id === item.id ? { ...row, contentStatus: nextStatus } : row) })); MetisMessage.success(item.contentStatus === 'published' ? '题单已下线' : '题单已上线') }}>{item.contentStatus === 'published' ? '下线' : '上线'}</MetisButton></div>,
     },
   ], [navigate])
 
@@ -102,8 +94,6 @@ export function QuestionSetListPage() {
           <p>统一管理同步练习与专题题单；生成记录与规则作为题单库的辅助能力。</p>
         </div>
         <div className="heading-actions">
-          <MetisButton onClick={() => navigate('/jobs')}>生成记录</MetisButton>
-          <MetisButton onClick={() => navigate('/rules')}>生成规则</MetisButton>
           <MetisButton onClick={() => MetisMessage.info('打开纯人工组题流程')}>新建题单</MetisButton>
           <MetisButton type="primary" data-track="/click/questionSetList/generateFromWorkbook | 从练习册生成题单 | 无" onClick={() => setDialogOpen(true)}>从练习册生成</MetisButton>
         </div>
@@ -125,9 +115,7 @@ export function QuestionSetListPage() {
           <FilterField label="来源练习册ID"><MetisInput value={query.filters.workbookId} placeholder="请输入练习册ID" onChange={(event) => updateFilters({ workbookId: event.target.value })} /></FilterField>
           {expandedFilters && <>
             <FilterField label="内容状态"><MetisSelect allowClear value={query.filters.contentStatus} placeholder="全部内容状态" options={[{label:'草稿',value:'draft'},{label:'已上线',value:'published'},{label:'已下线',value:'offline'}]} onChange={(value) => updateFilters({ contentStatus: value as ContentStatus | undefined })} /></FilterField>
-            <FilterField label="上游状态"><MetisSelect allowClear value={query.filters.syncStatus} placeholder="全部上游状态" options={[{label:'已同步',value:'synced'},{label:'上游有变更',value:'changed'},{label:'同步冲突',value:'conflict'},{label:'人工锁定',value:'locked'},{label:'来源失效',value:'invalid'}]} onChange={(value) => updateFilters({ syncStatus: value as SyncStatus | undefined })} /></FilterField>
             <FilterField label="目录关联"><MetisSelect allowClear value={query.filters.bindingStatus} placeholder="全部关联状态" options={[{label:'已关联',value:'bound'},{label:'待关联',value:'pending'},{label:'部分关联',value:'partial'},{label:'关联失效',value:'invalid'}]} onChange={(value) => updateFilters({ bindingStatus: value as BindingStatus | undefined })} /></FilterField>
-            <FilterField label="负责人"><MetisSelect allowClear value={query.filters.owner} placeholder="全部负责人" options={[{label:'王晓慧',value:'王晓慧'},{label:'李明',value:'李明'},{label:'赵琪',value:'赵琪'},{label:'陈薇',value:'陈薇'}]} onChange={(value) => updateFilters({ owner: value ? String(value) : undefined })} /></FilterField>
           </>}
         </div>
         <div className="filter-actions"><MetisButton onClick={() => setQuery(initialQuery)}>重置</MetisButton><MetisButton type="primary" onClick={() => void load()}>搜索</MetisButton></div>
@@ -148,7 +136,7 @@ export function QuestionSetListPage() {
             loading={status === 'loading'}
             columns={columns}
             dataSource={result.items}
-            scroll={{ x: 2050 }}
+            scroll={{ x: 1950 }}
             rowSelection={{ selectedRowKeys: selectedKeys, onChange: (keys: Key[]) => setSelectedKeys(keys) }}
             pagination={{ current: query.page, pageSize: query.pageSize, total: result.total, onChange: (page: number, pageSize: number) => setQuery((current) => ({ ...current, page, pageSize })) }}
           />
