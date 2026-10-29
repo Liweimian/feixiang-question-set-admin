@@ -51,7 +51,7 @@ export function GenerateQuestionSetDialog({ open, onClose, onGenerated }: Genera
         <strong>{importedFile ? importedFile.name : '点击选择 Excel 文件'}</strong>
         <p>{importedFile ? `${(importedFile.size / 1024).toFixed(1)} KB · 文件已读取，下一步将进行字段校验` : '或将文件拖拽到此处上传'}</p>
       </label>
-      <MetisAlert type="info" showIcon message="一行代表一道题目" description="通过题单唯一标识将多行题目聚合成题单。必填列：题单唯一标识、题单名称、类型、阶段、科目、题目ID、题目顺序；专题的年级、学期和教材版本可以留空。" />
+      <MetisAlert type="info" showIcon message="一行代表一道题目" description="通过题单唯一标识将多行题目聚合成题单。必填列：题单唯一标识、题单名称、类型、阶段、科目、题目ID、题目顺序；同步练习需填写学年，专题的学年、年级、学期和教材版本可以留空。" />
     </section>}
 
     {step === 2 && <section className="wizard-panel form-grid" data-sec="2">

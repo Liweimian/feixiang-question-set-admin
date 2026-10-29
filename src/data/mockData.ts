@@ -13,7 +13,7 @@ export const questionSets: QuestionSet[] = [
     description: '按练习册末级章节生成，保留选择、填空、解答三个模块。',
     type: 'sync',
     method: 'workbook',
-    scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '沪教版(五四制)(2024)', volume: '上册' },
+    scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
       workbookId: '8554',
       workbookName: '一课一练普通版 2026-2027学年',
@@ -43,7 +43,7 @@ export const questionSets: QuestionSet[] = [
     description: '概念辨析、平方根性质与基础计算。',
     type: 'sync',
     method: 'workbook',
-    scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '沪教版(五四制)(2024)', volume: '上册' },
+    scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
       workbookId: '8554', workbookName: '一课一练普通版 2026-2027学年', chapterIds: ['856419'],
       chapterPath: '第19章 实数 / 19.1(2) 平方根', sourceVersion: '2026-10-13 21:10', ruleVersion: '同步题单规则 v1.3',
@@ -67,7 +67,7 @@ export const questionSets: QuestionSet[] = [
     description: '自动生成后待学科编辑审核。',
     type: 'sync',
     method: 'workbook',
-    scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '沪教版(五四制)(2024)', volume: '上册' },
+    scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
       workbookId: '8554', workbookName: '一课一练普通版 2026-2027学年', chapterIds: ['856420'],
       chapterPath: '第19章 实数 / 19.1(3) 立方根', sourceVersion: '2026-10-13 20:58', ruleVersion: '同步题单规则 v1.3',
@@ -90,7 +90,7 @@ export const questionSets: QuestionSet[] = [
     description: '来源章节已完成录题，但尚未关联教材章节。',
     type: 'sync',
     method: 'workbook',
-    scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '沪教版(五四制)(2024)', volume: '上册' },
+    scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
       workbookId: '8554', workbookName: '一课一练普通版 2026-2027学年', chapterIds: ['856473'],
       chapterPath: '第20章 二次根式 / 20.2(3) 分母有理化', sourceVersion: '2026-10-13 19:42', ruleVersion: '同步题单规则 v1.3',
@@ -181,9 +181,9 @@ export const questionSets: QuestionSet[] = [
     description: '上游录题仍在生产中，来源暂不可用。',
     type: 'sync',
     method: 'workbook',
-    scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '沪教版(五四制)(2024)', volume: '上册' },
+    scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2025-2026学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
-      workbookId: '8554', workbookName: '一课一练普通版 2026-2027学年', chapterIds: ['856422'],
+      workbookId: '8554', workbookName: '一课一练普通版 2025-2026学年', chapterIds: ['856422'],
       chapterPath: '第19章 实数 / 19.2(1) 有理数的小数形式', sourceVersion: '2026-10-13 17:12', ruleVersion: '同步题单规则 v1.3',
     },
     questionCount: 11,

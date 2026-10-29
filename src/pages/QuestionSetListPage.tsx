@@ -67,6 +67,7 @@ export function QuestionSetListPage() {
     { title: '阶段', key: 'phase', width: 90, render: (_: unknown, item: QuestionSet) => item.scope.phase || '-' },
     { title: '科目', key: 'subject', width: 90, render: (_: unknown, item: QuestionSet) => item.scope.subject || '-' },
     { title: '年级', key: 'grade', width: 100, render: (_: unknown, item: QuestionSet) => item.type === 'topic' ? '-' : item.scope.grade || '-' },
+    { title: '学年', key: 'academicYear', width: 130, render: (_: unknown, item: QuestionSet) => item.type === 'topic' ? '-' : item.scope.academicYear || '-' },
     { title: '学期', key: 'semester', width: 90, render: (_: unknown, item: QuestionSet) => item.scope.semester || (item.type === 'topic' ? '-' : item.scope.volume.replace('册', '学期')) },
     { title: '教材版本', key: 'textbook', width: 170, render: (_: unknown, item: QuestionSet) => item.type === 'topic' ? '-' : item.scope.textbook || '-' },
     { title: '生产方式', key: 'method', width: 120, render: (_: unknown, item: QuestionSet) => <MethodLabel value={item.method} /> },
@@ -109,6 +110,7 @@ export function QuestionSetListPage() {
           <FilterField label="阶段"><MetisSelect allowClear value={query.filters.phase} placeholder="全部阶段" options={[{label:'小学',value:'小学'},{label:'初中',value:'初中'},{label:'高中',value:'高中'}]} onChange={(value) => updateFilters({ phase: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="科目"><MetisSelect allowClear value={query.filters.subject} placeholder="全部科目" options={[{label:'语文',value:'语文'},{label:'数学',value:'数学'},{label:'英语',value:'英语'},{label:'物理',value:'物理'}]} onChange={(value) => updateFilters({ subject: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="年级"><MetisSelect allowClear value={query.filters.grade} placeholder="全部年级" options={[{label:'七年级',value:'七年级'},{label:'八年级',value:'八年级'},{label:'九年级',value:'九年级'}]} onChange={(value) => updateFilters({ grade: value ? String(value) : undefined })} /></FilterField>
+          <FilterField label="学年"><MetisSelect allowClear value={query.filters.academicYear} placeholder="全部学年" options={[{label:'2026-2027学年',value:'2026-2027学年'},{label:'2025-2026学年',value:'2025-2026学年'},{label:'2024-2025学年',value:'2024-2025学年'}]} onChange={(value) => updateFilters({ academicYear: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="学期"><MetisSelect allowClear value={query.filters.semester} placeholder="全部学期" options={[{label:'上学期',value:'上学期'},{label:'下学期',value:'下学期'}]} onChange={(value) => updateFilters({ semester: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="教材版本"><MetisSelect allowClear value={query.filters.textbook} placeholder="全部教材版本" options={[{label:'沪教版(五四制)',value:'沪教版'},{label:'统编版',value:'统编版'},{label:'多版本/通用',value:'多版本'}]} onChange={(value) => updateFilters({ textbook: value ? String(value) : undefined })} /></FilterField>
           <FilterField label="生产方式"><MetisSelect allowClear value={query.filters.method} placeholder="全部生产方式" options={[{label:'练习册生成',value:'workbook'},{label:'人工组题',value:'manual'},{label:'规则生成',value:'rule'}]} onChange={(value) => updateFilters({ method: value as ProductionMethod | undefined })} /></FilterField>
@@ -134,7 +136,7 @@ export function QuestionSetListPage() {
             loading={status === 'loading'}
             columns={columns}
             dataSource={result.items}
-            scroll={{ x: 2100 }}
+            scroll={{ x: 2230 }}
             rowSelection={{ selectedRowKeys: selectedKeys, onChange: (keys: Key[]) => setSelectedKeys(keys) }}
             pagination={{ current: query.page, pageSize: query.pageSize, total: result.total, onChange: (page: number, pageSize: number) => setQuery((current) => ({ ...current, page, pageSize })) }}
           />

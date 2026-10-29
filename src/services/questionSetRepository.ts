@@ -31,6 +31,7 @@ export const questionSetRepository: QuestionSetRepository = {
         && (!filters.bindingStatus || item.bindingStatus === filters.bindingStatus)
         && (!filters.subject || item.scope.subject === filters.subject)
         && (!filters.grade || item.scope.grade === filters.grade)
+        && (!filters.academicYear || item.scope.academicYear === filters.academicYear)
         && (!filters.semester || (item.scope.semester ?? item.scope.volume.replace('册', '学期')) === filters.semester)
         && (!filters.textbook || item.scope.textbook.includes(filters.textbook))
         && (!filters.method || item.method === filters.method)
