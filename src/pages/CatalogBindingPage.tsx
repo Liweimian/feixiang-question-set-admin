@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  MetisAlert,
   MetisButton,
   MetisDialog,
   MetisInput,
@@ -9,9 +10,11 @@ import {
   MetisTabs,
   MetisTag,
 } from '@yuanfudao/metis-web-component'
-import { catalogBindings, questionSets } from '../data/mockData'
+import { questionSets } from '../data/mockData'
+import { LinkedCategoryTags } from '../components/StatusTags'
 import type { CatalogBinding, QuestionSet } from '../features/question-sets/types'
-import { useNavigate } from 'react-router-dom'
+import { catalogBindingRepository, summarizeQuestionSetBindings } from '../services/catalogBindingRepository'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 interface CatalogBindingPageProps {
   mode: 'textbook' | 'topic'
@@ -73,29 +76,37 @@ const resourcesByTab: Record<Exclude<RelationTab, 'questionSet'>, RelatedResourc
 
 export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isTextbook = mode === 'textbook'
   const nodes = isTextbook ? textbookNodes : topicNodes
+  const requestedNode = searchParams.get('node')
   const [selectedNode, setSelectedNode] = useState(isTextbook ? 'TC-310418' : 'TOPIC-2201')
   const [relationTab, setRelationTab] = useState<RelationTab>(isTextbook ? 'knowledge' : 'questionSet')
   const [topicPanel, setTopicPanel] = useState<'sets' | 'history'>('sets')
   const [questionSetDialogOpen, setQuestionSetDialogOpen] = useState(false)
   const [questionSetKeyword, setQuestionSetKeyword] = useState('')
-  const [boundRows, setBoundRows] = useState(catalogBindings)
+  const [boundRows, setBoundRows] = useState(() => catalogBindingRepository.list())
 
   useEffect(() => {
-    setSelectedNode(isTextbook ? 'TC-310418' : 'TOPIC-2201')
+    setSelectedNode(requestedNode && nodes.some((node) => node.id === requestedNode)
+      ? requestedNode
+      : isTextbook ? 'TC-310418' : 'TOPIC-2201')
     setRelationTab(isTextbook ? 'knowledge' : 'questionSet')
     setTopicPanel('sets')
-  }, [isTextbook])
+    setBoundRows(catalogBindingRepository.list())
+  }, [isTextbook, nodes, requestedNode])
 
   const currentNode = nodes.find((node) => node.id === selectedNode) ?? nodes[0]
   const expectedTreeType = isTextbook ? '同步练习树' : '专题树'
   const bindings = boundRows.filter((binding) => binding.treeType === expectedTreeType && binding.nodeId === selectedNode)
   const selectableSets = useMemo(() => questionSets.filter((item) => {
-    if (item.type !== 'sync' && item.type !== 'topic') return false
     const keyword = questionSetKeyword.trim().toLowerCase()
     return !keyword || item.id.toLowerCase().includes(keyword) || item.title.toLowerCase().includes(keyword) || item.source.chapterPath.toLowerCase().includes(keyword)
   }), [questionSetKeyword])
+  const removeBinding = (id: string) => {
+    catalogBindingRepository.remove(id)
+    setBoundRows(catalogBindingRepository.list())
+  }
 
   const resourceColumns = [
     { title: '资源ID', dataIndex: 'id', key: 'id', width: 130 },
@@ -110,9 +121,9 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const textbookQuestionSetColumns = [
     { title: '题单ID', dataIndex: 'setId', key: 'setId', width: 180, render: (value: string) => <button className="table-link" type="button" onClick={() => navigate(`/assets/${value}`)}>{value}</button> },
     { title: '题单名称', dataIndex: 'setTitle', key: 'setTitle', render: (value: string, item: CatalogBinding) => <button className="table-link table-link-title" type="button" onClick={() => navigate(`/assets/${item.setId}`)}>{value}</button> },
-    { title: '题单类型', key: 'type', width: 160, render: () => <MetisTag color="processing">同步练习</MetisTag> },
+    { title: '已关联分类', key: 'linkedCategories', width: 240, render: (_: unknown, item: CatalogBinding) => { const summary = summarizeQuestionSetBindings(boundRows, item.setId); return <LinkedCategoryTags categories={summary.linkedCategories} counts={summary.linkedCategoryCounts} /> } },
     { title: '题单状态', dataIndex: 'status', key: 'status', width: 140, render: (value: string) => <MetisTag color={value === '有效' ? 'success' : 'warning'}>{value === '有效' ? '已上线' : value}</MetisTag> },
-    { title: '操作', key: 'actions', width: 180, render: (_: unknown, item: CatalogBinding) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.setId}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => setBoundRows((rows) => rows.filter((row) => row.id !== item.id))}>解除关联</MetisButton></div> },
+    { title: '操作', key: 'actions', width: 180, render: (_: unknown, item: CatalogBinding) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.setId}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => removeBinding(item.id)}>解除关联</MetisButton></div> },
   ]
 
   const textbookRelationItems = [
@@ -132,24 +143,28 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
 
   const libraryColumns = [
     { title: '题单ID / 名称', key: 'set', width: 330, render: (_: unknown, item: QuestionSet) => <div className="stacked-cell"><button className="table-link table-link-title" type="button" onClick={() => navigate(`/assets/${item.id}`)}>{item.title}</button><button className="table-link" type="button" onClick={() => navigate(`/assets/${item.id}`)}>{item.id}</button></div> },
-    { title: '类型', key: 'type', width: 110, render: (_: unknown, item: QuestionSet) => <MetisTag color={item.type === 'topic' ? 'purple' : item.type === 'sync' ? 'processing' : 'default'}>{item.type === 'topic' ? '专题' : item.type === 'sync' ? '同步练习' : '其他'}</MetisTag> },
-    { title: '教学范围', key: 'scope', width: 170, render: (_: unknown, item: QuestionSet) => `${item.scope.phase} · ${item.scope.subject} · ${item.scope.grade}` },
+    { title: '已关联分类', key: 'linkedCategories', width: 220, render: (_: unknown, item: QuestionSet) => { const summary = summarizeQuestionSetBindings(boundRows, item.id); return <div className="stacked-cell"><LinkedCategoryTags categories={summary.linkedCategories} counts={summary.linkedCategoryCounts} /><span>{summary.bindings.length ? `已关联 ${summary.bindings.length} 个目录` : '暂未关联目录'}</span></div> } },
+    { title: '教学范围', key: 'scope', width: 170, render: (_: unknown, item: QuestionSet) => [item.scope.phase, item.scope.subject, item.scope.grade].filter(Boolean).join(' · ') || '-' },
     { title: '来源', key: 'source', render: (_: unknown, item: QuestionSet) => <div className="stacked-cell">{item.source.workbookId ? <a className="table-link table-link-title" href={`https://metis-gnosis.zhenguanyu.com/#/exercise-book/${item.source.workbookId}`} target="_blank" rel="noreferrer">{item.source.workbookName}</a> : <strong>人工组题</strong>}<span>{item.source.chapterPath}</span></div> },
     { title: '题量', dataIndex: 'questionCount', key: 'questionCount', width: 70 },
     { title: '状态', key: 'status', width: 100, render: (_: unknown, item: QuestionSet) => <MetisTag color={item.contentStatus === 'published' ? 'success' : 'warning'}>{item.contentStatus === 'published' ? '已上线' : '未上线'}</MetisTag> },
     { title: '操作', key: 'actions', width: 110, render: (_: unknown, item: QuestionSet) => {
-      const alreadyBound = bindings.some((binding) => binding.setId === item.id)
-      return <MetisButton type="primary" disabled={alreadyBound} onClick={() => {
-        const next: CatalogBinding = { id: `BIND-${Date.now()}`, treeType: expectedTreeType, nodePath: currentNode.label, nodeId: currentNode.id, setTitle: item.title, setId: item.id, primary: true, region: '全国', status: '待生效', operator: '王晓慧', updatedAt: '刚刚' }
-        setBoundRows((rows) => [...rows, next])
+      const summary = summarizeQuestionSetBindings(boundRows, item.id)
+      const alreadyBoundCurrentNode = summary.bindings.some((binding) => binding.treeType === expectedTreeType && binding.nodeId === currentNode.id)
+      const hasOtherBindings = summary.bindings.length > 0
+      return <MetisButton type="primary" disabled={alreadyBoundCurrentNode} onClick={() => {
+        const next: CatalogBinding = { id: `BIND-${Date.now()}`, treeType: expectedTreeType, nodePath: currentNode.label, nodeId: currentNode.id, setTitle: item.title, setId: item.id, primary: !summary.bindings.some((binding) => binding.treeType === expectedTreeType), region: '全国', status: '待生效', operator: '王晓慧', updatedAt: '刚刚' }
+        catalogBindingRepository.add(next)
+        setBoundRows(catalogBindingRepository.list())
         setQuestionSetDialogOpen(false)
         MetisMessage.success(`已将 ${item.id} 关联到 ${currentNode.label}`)
-      }}>{alreadyBound ? '已关联' : '关联'}</MetisButton>
+      }}>{alreadyBoundCurrentNode ? '当前节点已关联' : hasOtherBindings ? '继续关联' : '关联'}</MetisButton>
     } },
   ]
 
   const questionSetLibraryDialog = <MetisDialog title={`关联题单 · ${currentNode.label}`} open={questionSetDialogOpen} width={1120} footer={null} onCancel={() => setQuestionSetDialogOpen(false)}>
     <div className="question-set-picker">
+      <MetisAlert type="info" showIcon message="题单可关联多个目录" description="已关联其他教材章节或专题节点的题单仍可继续关联；只有当前节点已关联时不可重复。" />
       <div className="question-set-picker-toolbar"><div><strong>题单库</strong><span>共 {selectableSets.length} 条题单</span></div><MetisInput value={questionSetKeyword} onChange={(event) => setQuestionSetKeyword(event.target.value)} placeholder="搜索题单ID、名称或来源章节" /></div>
       <MetisTable<QuestionSet> rowKey="id" columns={libraryColumns} dataSource={selectableSets} pagination={{ pageSize: 6 }} />
     </div>
@@ -158,12 +173,12 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   if (!isTextbook) {
     const topicBindingColumns = [
       { title: '题单ID / 名称', key: 'set', width: 360, render: (_: unknown, item: CatalogBinding) => <div className="stacked-cell"><button className="table-link table-link-title" type="button" onClick={() => navigate(`/assets/${item.setId}`)}>{item.setTitle}</button><button className="table-link" type="button" onClick={() => navigate(`/assets/${item.setId}`)}>{item.setId}</button></div> },
-      { title: '题单类型', key: 'type', width: 120, render: () => <MetisTag color="purple">专题</MetisTag> },
+      { title: '已关联分类', key: 'linkedCategories', width: 240, render: (_: unknown, item: CatalogBinding) => { const summary = summarizeQuestionSetBindings(boundRows, item.setId); return <LinkedCategoryTags categories={summary.linkedCategories} counts={summary.linkedCategoryCounts} /> } },
       { title: '题量', key: 'count', width: 90, render: (_: unknown, item: CatalogBinding) => questionSets.find((set) => set.id === item.setId)?.questionCount ?? 18 },
       { title: '来源', key: 'source', render: (_: unknown, item: CatalogBinding) => { const set = questionSets.find((row) => row.id === item.setId); return set?.source.workbookId ? <a className="table-link" href={`https://metis-gnosis.zhenguanyu.com/#/exercise-book/${set.source.workbookId}`} target="_blank" rel="noreferrer">{set.source.workbookName}</a> : set?.source.chapterPath ?? '人工组题' } },
       { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: (value: string) => <MetisTag color={value === '有效' ? 'success' : 'warning'}>{value}</MetisTag> },
       { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt', width: 150 },
-      { title: '操作', key: 'actions', width: 150, render: (_: unknown, item: CatalogBinding) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.setId}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => setBoundRows((rows) => rows.filter((row) => row.id !== item.id))}>移除</MetisButton></div> },
+      { title: '操作', key: 'actions', width: 150, render: (_: unknown, item: CatalogBinding) => <div className="table-actions"><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.setId}`)}>查看</MetisButton><MetisButton type="borderless" onClick={() => removeBinding(item.id)}>移除</MetisButton></div> },
     ]
     const topicHistoryColumns = [
       { title: '操作类型', dataIndex: 'action', key: 'action', width: 140 },

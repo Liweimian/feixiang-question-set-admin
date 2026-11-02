@@ -73,7 +73,7 @@ export function GenerationJobsPage() {
       </header>
 
       <section className="rule-summary-card" data-sec="2">
-        <div className="rule-summary-title"><div><MetisTag color="success">已启用</MetisTag><strong>同步题单自动生成 · v1.3</strong></div><MetisButton type="borderless" onClick={() => MetisMessage.info('跳转生成规则')}>查看规则</MetisButton></div>
+        <div className="rule-summary-title"><div><MetisTag color="success">已启用</MetisTag><strong>练习册题单自动生成 · v1.3</strong></div><MetisButton type="borderless" onClick={() => MetisMessage.info('跳转生成规则')}>查看规则</MetisButton></div>
         <div className="rule-flow">
           <div><small>触发</small><strong>练习册版本正式发布</strong><span>且结构录入、录题均完成</span></div>
           <i>→</i>
@@ -81,7 +81,7 @@ export function GenerationJobsPage() {
           <i>→</i>
           <div><small>生成</small><strong>一章节一题单草稿</strong><span>按题目 ID 去重、保留模块顺序</span></div>
           <i>→</i>
-          <div><small>交付</small><strong>质检 + 生成草稿</strong><span>唯一映射才自动关联目录</span></div>
+          <div><small>交付</small><strong>质检 + 生成草稿</strong><span>题单生成后可关联多个目录</span></div>
         </div>
       </section>
 

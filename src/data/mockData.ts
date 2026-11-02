@@ -11,7 +11,6 @@ export const questionSets: QuestionSet[] = [
     id: 'QS-10458',
     title: '19.1(1) 算术平方根课时过关',
     description: '按练习册末级章节生成，保留选择、填空、解答三个模块。',
-    type: 'sync',
     method: 'workbook',
     scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
@@ -29,7 +28,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['课时练', '系列题单'],
     contentStatus: 'published',
     syncStatus: 'changed',
-    bindingStatus: 'bound',
     syncPolicy: 'merge',
     onlineVersion: 'V3',
     draftVersion: 'V4',
@@ -41,7 +39,6 @@ export const questionSets: QuestionSet[] = [
     id: 'QS-10459',
     title: '19.1(2) 平方根同步练习',
     description: '概念辨析、平方根性质与基础计算。',
-    type: 'sync',
     method: 'workbook',
     scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
@@ -55,7 +52,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['课时练'],
     contentStatus: 'published',
     syncStatus: 'synced',
-    bindingStatus: 'bound',
     syncPolicy: 'merge',
     onlineVersion: 'V2',
     owner: '王晓慧',
@@ -65,7 +61,6 @@ export const questionSets: QuestionSet[] = [
     id: 'QS-10460',
     title: '19.1(3) 立方根基础练习',
     description: '自动生成后待学科编辑审核。',
-    type: 'sync',
     method: 'workbook',
     scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
@@ -78,7 +73,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['课时练'],
     contentStatus: 'draft',
     syncStatus: 'synced',
-    bindingStatus: 'unbound',
     syncPolicy: 'follow',
     draftVersion: 'V1',
     owner: '李明',
@@ -88,7 +82,6 @@ export const questionSets: QuestionSet[] = [
     id: 'QS-10473',
     title: '20.2(3) 分母有理化同步练习',
     description: '来源章节已完成录题，但尚未关联教材章节。',
-    type: 'sync',
     method: 'workbook',
     scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2026-2027学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
@@ -101,7 +94,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['课时练'],
     contentStatus: 'draft',
     syncStatus: 'conflict',
-    bindingStatus: 'unbound',
     syncPolicy: 'merge',
     draftVersion: 'V1',
     owner: '李明',
@@ -112,7 +104,6 @@ export const questionSets: QuestionSet[] = [
     id: 'TOP-2056',
     title: '二次根式化简易错专项',
     description: '由三个练习册章节聚合，人工排除 4 道重复题。',
-    type: 'topic',
     method: 'manual',
     scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '多版本', volume: '上册' },
     source: {
@@ -125,7 +116,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['易错专项', '培优突破'],
     contentStatus: 'draft',
     syncStatus: 'changed',
-    bindingStatus: 'unbound',
     syncPolicy: 'merge',
     draftVersion: 'V2',
     owner: '赵琪',
@@ -136,7 +126,6 @@ export const questionSets: QuestionSet[] = [
     id: 'TOP-2057',
     title: '一元二次方程四种解法专项',
     description: '覆盖因式分解、开平方、配方与公式法。',
-    type: 'topic',
     method: 'manual',
     scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
@@ -149,7 +138,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['方法专项', '名师推荐'],
     contentStatus: 'published',
     syncStatus: 'locked',
-    bindingStatus: 'bound',
     syncPolicy: 'lock',
     onlineVersion: 'V1',
     owner: '赵琪',
@@ -159,7 +147,6 @@ export const questionSets: QuestionSet[] = [
     id: 'CUS-3108',
     title: '八上期中高频易错诊断',
     description: '学科编辑从全局题库人工组建。',
-    type: 'custom',
     method: 'manual',
     scope: { phase: '初中', subject: '数学', grade: '八年级', textbook: '通用', volume: '上册' },
     source: { chapterIds: [], chapterPath: '无上游来源' },
@@ -169,7 +156,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['期中', '高频易错'],
     contentStatus: 'draft',
     syncStatus: 'none',
-    bindingStatus: 'unbound',
     syncPolicy: 'lock',
     draftVersion: 'V1',
     owner: '陈薇',
@@ -179,7 +165,6 @@ export const questionSets: QuestionSet[] = [
     id: 'QS-10422',
     title: '19.2(1) 有理数的小数形式',
     description: '上游录题仍在生产中，来源暂不可用。',
-    type: 'sync',
     method: 'workbook',
     scope: { phase: '初中', subject: '数学', grade: '八年级', academicYear: '2025-2026学年', textbook: '沪教版(五四制)(2024)', volume: '上册' },
     source: {
@@ -192,7 +177,6 @@ export const questionSets: QuestionSet[] = [
     tags: ['课时练'],
     contentStatus: 'draft',
     syncStatus: 'invalid',
-    bindingStatus: 'unbound',
     syncPolicy: 'follow',
     draftVersion: 'V1',
     owner: '李明',
@@ -220,7 +204,7 @@ export const generationJobs: GenerationJob[] = [
   { id: 'JOB-20261021-8823', trigger: '自动事件', workbook: '初中必刷题·九上物理', workbookId: '8823', ruleVersion: 'v1.3', eligible: 50, created: 47, updated: 0, skipped: 2, conflict: 1, failed: 0, status: 'partial', startedAt: '2026-10-21 17:55', duration: '4分12秒', initiator: '系统' },
   { id: 'JOB-20261021-8554', trigger: '失败重试', workbook: '一课一练普通版·八上数学', workbookId: '8554', ruleVersion: 'v1.3', eligible: 42, created: 0, updated: 39, skipped: 2, conflict: 0, failed: 1, status: 'partial', startedAt: '2026-10-21 16:30', duration: '2分48秒', initiator: '王晓慧' },
   { id: 'JOB-20261021-8816', trigger: '自动事件', workbook: '名校课堂·九上道德与法治', workbookId: '8816', ruleVersion: 'v1.3', eligible: 39, created: 39, updated: 0, skipped: 0, conflict: 0, failed: 0, status: 'success', startedAt: '2026-10-21 15:06', duration: '3分06秒', initiator: '系统' },
-  { id: 'JOB-20261020-TOP2056', trigger: '人工批量', workbook: '一课一练普通版·八上数学', workbookId: '8554', ruleVersion: '专题v1.1', eligible: 3, created: 1, updated: 0, skipped: 0, conflict: 0, failed: 0, status: 'success', startedAt: '2026-10-20 09:30', duration: '36秒', initiator: '赵琪' },
+  { id: 'JOB-20261020-TOP2056', trigger: '人工批量', workbook: '一课一练普通版·八上数学', workbookId: '8554', ruleVersion: '聚合v1.1', eligible: 3, created: 1, updated: 0, skipped: 0, conflict: 0, failed: 0, status: 'success', startedAt: '2026-10-20 09:30', duration: '36秒', initiator: '赵琪' },
   { id: 'JOB-20261020-8818', trigger: '自动事件', workbook: '五三初中试卷·八上生物', workbookId: '8818', ruleVersion: 'v1.3', eligible: 15, created: 0, updated: 0, skipped: 15, conflict: 0, failed: 0, status: 'success', startedAt: '2026-10-20 08:10', duration: '22秒', initiator: '系统' },
 ]
 
@@ -230,4 +214,5 @@ export const catalogBindings: CatalogBinding[] = [
   { id: 'BIND-1003', treeType: '专题树', nodePath: '知识模块 / 数与式 / 二次根式', nodeId: 'TOPIC-2201', setTitle: '二次根式化简易错专项', setId: 'TOP-2056', primary: true, region: '全国', status: '待生效', operator: '赵琪', updatedAt: '2026-10-21 13:16' },
   { id: 'BIND-1004', treeType: '专题树', nodePath: '难点突破 / 分母有理化', nodeId: 'TOPIC-5508', setTitle: '二次根式化简易错专项', setId: 'TOP-2056', primary: false, region: '全国', status: '待生效', operator: '赵琪', updatedAt: '2026-10-21 13:18' },
   { id: 'BIND-1005', treeType: '专题树', nodePath: '知识模块 / 方程 / 一元二次方程', nodeId: 'TOPIC-2402', setTitle: '一元二次方程四种解法专项', setId: 'TOP-2057', primary: true, region: '全国', status: '有效', operator: '赵琪', updatedAt: '2026-10-20 19:03' },
+  { id: 'BIND-1006', treeType: '专题树', nodePath: '难点突破 / 分母有理化', nodeId: 'TOPIC-5508', setTitle: '19.1(1) 算术平方根课时过关', setId: 'QS-10458', primary: true, region: '全国', status: '有效', operator: '赵琪', updatedAt: '2026-10-22 10:18' },
 ]

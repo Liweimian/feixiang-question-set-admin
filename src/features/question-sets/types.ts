@@ -1,20 +1,20 @@
 export type EntityId = string
 
-export type QuestionSetType = 'sync' | 'topic' | 'custom'
 export type ProductionMethod = 'workbook' | 'manual' | 'rule'
 export type ContentStatus = 'draft' | 'review' | 'ready' | 'published' | 'offline'
 export type SyncStatus = 'synced' | 'changed' | 'conflict' | 'locked' | 'invalid' | 'none'
 export type BindingStatus = 'bound' | 'unbound'
 export type SyncPolicy = 'merge' | 'follow' | 'lock'
+export type CatalogTreeType = '同步练习树' | '专题树'
 
 export interface TeachingScope {
   phase: string
   subject: string
-  grade: string
+  grade?: string
   academicYear?: string
   semester?: string
-  textbook: string
-  volume: string
+  textbook?: string
+  volume?: string
 }
 
 export interface SourceSummary {
@@ -37,7 +37,6 @@ export interface QuestionSet {
   id: EntityId
   title: string
   description: string
-  type: QuestionSetType
   method: ProductionMethod
   scope: TeachingScope
   source: SourceSummary
@@ -48,13 +47,18 @@ export interface QuestionSet {
   tags: string[]
   contentStatus: ContentStatus
   syncStatus: SyncStatus
-  bindingStatus: BindingStatus
   syncPolicy: SyncPolicy
   onlineVersion?: string
   draftVersion?: string
   owner: string
   updatedAt: string
   diff?: SourceDiff
+}
+
+export interface QuestionSetListItem extends QuestionSet {
+  linkedCategories: CatalogTreeType[]
+  linkedCategoryCounts: Partial<Record<CatalogTreeType, number>>
+  bindingStatus: BindingStatus
 }
 
 export interface QuestionItem {
@@ -101,7 +105,7 @@ export interface GenerationJob {
 
 export interface CatalogBinding {
   id: EntityId
-  treeType: '同步练习树' | '专题树'
+  treeType: CatalogTreeType
   nodePath: string
   nodeId: string
   setTitle: string
@@ -117,7 +121,7 @@ export interface QuestionSetFilters {
   id?: string
   title?: string
   questionId?: string
-  type?: QuestionSetType
+  linkedTreeType?: CatalogTreeType
   phase?: string
   contentStatus?: ContentStatus
   syncStatus?: SyncStatus

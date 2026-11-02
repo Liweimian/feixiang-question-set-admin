@@ -1,9 +1,9 @@
 import { MetisTag } from '@yuanfudao/metis-web-component'
 import type {
   BindingStatus,
+  CatalogTreeType,
   ContentStatus,
   ProductionMethod,
-  QuestionSetType,
   SyncStatus,
 } from '../features/question-sets/types'
 
@@ -29,12 +29,6 @@ const bindingMeta: Record<BindingStatus, { label: string; color: string }> = {
   unbound: { label: '未关联', color: 'default' },
 }
 
-const typeMeta: Record<QuestionSetType, string> = {
-  sync: '同步练习',
-  topic: '专题',
-  custom: '其他题单',
-}
-
 const methodMeta: Record<ProductionMethod, string> = {
   workbook: '练习册自动',
   manual: '人工创建',
@@ -56,8 +50,19 @@ export function BindingStatusTag({ value }: { value: BindingStatus }) {
   return <MetisTag color={item.color}>{item.label}</MetisTag>
 }
 
-export function TypeTag({ value }: { value: QuestionSetType }) {
-  return <MetisTag color={value === 'sync' ? 'processing' : value === 'topic' ? 'purple' : 'default'}>{typeMeta[value]}</MetisTag>
+export function LinkedCategoryTags({
+  categories,
+  counts,
+}: {
+  categories: CatalogTreeType[]
+  counts?: Partial<Record<CatalogTreeType, number>>
+}) {
+  if (categories.length === 0) return <span>-</span>
+  return <span className="linked-category-tags">{categories.map((category) => (
+    <MetisTag key={category} color={category === '同步练习树' ? 'processing' : 'purple'}>
+      {category}{counts?.[category] ? `（${counts[category]}）` : ''}
+    </MetisTag>
+  ))}</span>
 }
 
 export function MethodLabel({ value }: { value: ProductionMethod }) {

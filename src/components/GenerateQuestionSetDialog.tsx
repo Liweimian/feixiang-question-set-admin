@@ -51,20 +51,20 @@ export function GenerateQuestionSetDialog({ open, onClose, onGenerated }: Genera
         <strong>{importedFile ? importedFile.name : '点击选择 Excel 文件'}</strong>
         <p>{importedFile ? `${(importedFile.size / 1024).toFixed(1)} KB · 文件已读取，下一步将进行字段校验` : '或将文件拖拽到此处上传'}</p>
       </label>
-      <MetisAlert type="info" showIcon message="一行代表一道题目" description="通过题单唯一标识将多行题目聚合成题单。必填列：题单唯一标识、题单名称、类型、阶段、科目、题目ID、题目顺序；同步练习需填写学年，专题的学年、年级、学期和教材版本可以留空。" />
+      <MetisAlert type="info" showIcon message="一行代表一道题目" description="通过题单唯一标识将多行题目聚合成题单。必填列：题单唯一标识、题单名称、阶段、科目、题目ID、题目顺序；年级、学年、学期和教材版本按实际情况填写。" />
     </section>}
 
     {step === 2 && <section className="wizard-panel form-grid" data-sec="2">
       <label className="field-stack"><span>重复题单处理</span><MetisSelect value={duplicateMode} options={[{ label: '跳过已存在题单', value: 'skip' }, { label: '覆盖草稿内容', value: 'replace' }]} onChange={(value) => setDuplicateMode(String(value))} /></label>
       <label className="field-stack"><span>生成后状态</span><MetisSelect value="draft" options={[{ label: '草稿', value: 'draft' }]} /></label>
       <label className="field-stack field-span-2"><span>导入文件</span><MetisInput value={importedFile?.name ?? ''} readOnly /></label>
-      <MetisAlert type="warning" showIcon message="批量导入只创建题单草稿" description="题目ID不存在、顺序重复或必填字段缺失的数据将在预检中标记，确认前不会写入题单库。" />
+      <MetisAlert type="warning" showIcon message="批量导入只创建未关联的题单草稿" description="题目ID不存在、顺序重复或必填字段缺失的数据将在预检中标记；题单的关联分类在后续绑定目录时产生。" />
     </section>}
 
     {step === 3 && <section className="wizard-panel" data-sec="3">
       <div className="precheck-summary"><div><span>Excel 数据行</span><strong>126</strong></div><div><span>识别题单</span><strong>12</strong></div><div><span>可生成</span><strong>10</strong></div><div className="danger"><span>异常题单</span><strong>2</strong></div></div>
       <MetisAlert type="warning" showIcon message="预检完成：10 份可生成，2 份需修正" description="异常数据不会生成；可先导出错误明细，修正后重新导入。" />
-      <div className="precheck-list"><div><span><strong>同步练习-19.1</strong>19.1 算术平方根同步练习</span><span>26 题 · 校验通过</span></div><div><span><strong>专题-二次根式</strong>二次根式易错专项</span><span>32 题 · 校验通过</span></div><div><span><strong>同步练习-20.2</strong>分母有理化同步练习</span><span className="danger">缺少题目ID · 已阻断</span></div></div>
+      <div className="precheck-list"><div><span><strong>题单-19.1</strong>19.1 算术平方根练习</span><span>26 题 · 校验通过</span></div><div><span><strong>题单-二次根式</strong>二次根式易错练习</span><span>32 题 · 校验通过</span></div><div><span><strong>题单-20.2</strong>分母有理化练习</span><span className="danger">缺少题目ID · 已阻断</span></div></div>
     </section>}
   </MetisDialog>
 }

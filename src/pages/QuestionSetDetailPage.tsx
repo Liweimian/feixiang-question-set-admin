@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { MetisButton, MetisEmpty, MetisInput, MetisMessage, MetisSelect, MetisTable, MetisTabs, MetisTag } from '@yuanfudao/metis-web-component'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ContentStatusTag, MethodLabel, TypeTag } from '../components/StatusTags'
+import { ContentStatusTag, LinkedCategoryTags, MethodLabel } from '../components/StatusTags'
 import { detailQuestions, generationJobs } from '../data/mockData'
-import type { GenerationJob, QuestionSet } from '../features/question-sets/types'
+import type { CatalogBinding, GenerationJob, QuestionSet } from '../features/question-sets/types'
+import { summarizeQuestionSetBindings } from '../services/catalogBindingRepository'
 import { questionSetRepository } from '../services/questionSetRepository'
 
 export function QuestionSetDetailPage() {
@@ -11,13 +12,18 @@ export function QuestionSetDetailPage() {
   const { id = 'QS-10458' } = useParams()
   const [searchParams] = useSearchParams()
   const [record, setRecord] = useState<QuestionSet>()
+  const [bindings, setBindings] = useState<CatalogBinding[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('content')
   const [selectedQuestionId, setSelectedQuestionId] = useState(detailQuestions[0].id)
 
   useEffect(() => {
     setLoading(true)
-    void questionSetRepository.get(id).then((item) => { setRecord(item); setLoading(false) })
+    void Promise.all([questionSetRepository.get(id), questionSetRepository.getBindings(id)]).then(([item, relationRows]) => {
+      setRecord(item)
+      setBindings(relationRows)
+      setLoading(false)
+    })
   }, [id])
 
   useEffect(() => {
@@ -28,6 +34,7 @@ export function QuestionSetDetailPage() {
   if (loading) return <div className="page-container"><div className="loading-card">正在加载题单…</div></div>
   if (!record) return <div className="page-container"><div className="feedback-state"><MetisEmpty description="未找到该题单" /><MetisButton onClick={() => navigate('/assets')}>返回题单库</MetisButton></div></div>
 
+  const bindingSummary = summarizeQuestionSetBindings(bindings, record.id)
   const matchedProductionRows = generationJobs.filter((job) => !record.source.workbookId || job.workbookId === record.source.workbookId)
   const productionRows: GenerationJob[] = matchedProductionRows.length ? matchedProductionRows : [{ id: 'JOB-20261014-8554', trigger: '自动事件', workbook: record.source.workbookName ?? '人工组题', workbookId: record.source.workbookId ?? '-', ruleVersion: record.source.ruleVersion ?? '-', eligible: 1, created: 1, updated: 0, skipped: 0, conflict: 0, failed: 0, status: 'success', startedAt: '2026-10-14 09:42', duration: '18秒', initiator: '系统' }]
   const productionColumns = [
@@ -61,11 +68,12 @@ export function QuestionSetDetailPage() {
     <section className="question-set-basic-card" data-sec="2">
       <div className="question-set-basic-heading"><strong>基本信息</strong><MetisButton type="borderless" onClick={() => MetisMessage.info('编辑题单基本信息')}>编辑</MetisButton></div>
       <dl>
-        <div><dt>题单ID</dt><dd>{record.id}</dd></div><div><dt>类型</dt><dd><TypeTag value={record.type} /></dd></div>
+        <div><dt>题单ID</dt><dd>{record.id}</dd></div><div><dt>已关联分类</dt><dd><LinkedCategoryTags categories={bindingSummary.linkedCategories} counts={bindingSummary.linkedCategoryCounts} /></dd></div>
         <div><dt>题单名称</dt><dd>{record.title}</dd></div><div><dt>生产方式</dt><dd><MethodLabel value={record.method} /></dd></div>
-        <div><dt>阶段 / 科目</dt><dd>{record.scope.phase} / {record.scope.subject}</dd></div><div><dt>年级 / 学期</dt><dd>{record.type === 'topic' ? '-' : `${record.scope.grade} / ${record.scope.semester ?? record.scope.volume.replace('册', '学期')}`}</dd></div>
-        <div><dt>教材版本</dt><dd>{record.type === 'topic' ? '-' : record.scope.textbook}</dd></div>
+        <div><dt>阶段 / 科目</dt><dd>{record.scope.phase} / {record.scope.subject}</dd></div><div><dt>年级 / 学期</dt><dd>{record.scope.grade || '-'} / {record.scope.semester ?? (record.scope.volume ? record.scope.volume.replace('册', '学期') : '-')}</dd></div>
+        <div><dt>教材版本</dt><dd>{record.scope.textbook || '-'}</dd></div>
         <div><dt>来源练习册</dt><dd>{record.source.workbookId ? <a className="table-link" href={`https://metis-gnosis.zhenguanyu.com/#/exercise-book/${record.source.workbookId}`} target="_blank" rel="noreferrer">{record.source.workbookName}</a> : '-'}</dd></div><div><dt>来源章节</dt><dd>{record.source.chapterPath || '-'}</dd></div>
+        <div className="question-set-bindings-row"><dt>关联目录</dt><dd>{bindings.length ? bindings.map((binding) => <button key={binding.id} className="directory-link-chip" type="button" onClick={() => navigate(`${binding.treeType === '同步练习树' ? '/catalogs' : '/topic-tree'}?node=${encodeURIComponent(binding.nodeId)}`)}><span>{binding.treeType}</span>{binding.nodePath}</button>) : <span>暂无关联目录</span>}</dd></div>
         <div className="question-set-tags-row"><dt>标签</dt><dd>{[...record.tags, record.difficulty].filter(Boolean).map((tag) => <MetisTag key={tag}>{tag}</MetisTag>)}</dd></div>
       </dl>
     </section>
