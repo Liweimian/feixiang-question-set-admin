@@ -185,12 +185,12 @@ export const questionSets: QuestionSet[] = [
 ]
 
 export const detailQuestions: QuestionItem[] = [
-  { id: '89283656', revision: 'R3', order: 1, group: '一、选择题', stem: '若一个正数的算术平方根是 a，则比这个数大 3 的数的算术平方根是（ ）。', type: '单选题', difficulty: '较易', sourceModule: '模块1686167', origin: 'source', quality: 'passed' },
-  { id: '89260932', revision: 'R2', order: 2, group: '一、选择题', stem: '已知 a 的算术平方根是 12.3，x 的算术平方根是 1.23，则 x 和 a 的关系是（ ）。', type: '单选题', difficulty: '较易', sourceModule: '模块1686167', origin: 'source', quality: 'passed' },
-  { id: '89270799', revision: 'R1', order: 3, group: '一、选择题', stem: '下列说法中，正确的是（ ）。', type: '单选题', difficulty: '较易', sourceModule: '模块1686167', origin: 'source', quality: 'warning' },
-  { id: '89260933', revision: 'R2', order: 4, group: '二、填空题', stem: '算术平方根等于它本身的数是____，平方等于它本身的数是____。', type: '填空题', difficulty: '容易', sourceModule: '模块1686168', origin: 'source', quality: 'passed' },
-  { id: '90551021', revision: 'R1', order: 5, group: '二、填空题', stem: '若 √x = 5，则 x 的值为____。', type: '填空题', difficulty: '基础', sourceModule: '人工补题', origin: 'manual', quality: 'passed' },
-  { id: '89298141', revision: 'R1', order: 6, group: '三、解答题', stem: '结合数轴说明算术平方根的取值范围，并完成相应计算。', type: '解答题', difficulty: '中等', sourceModule: '模块1686169', origin: 'source', quality: 'passed' },
+  { id: '89283656', revision: 'R3', order: 1, group: '一、选择题', stem: '若一个正数的算术平方根是 a，则比这个数大 3 的数的算术平方根是（ ）。', type: '单选题', difficulty: '较易', sourceModule: '模块1686167', origin: 'source', status: 'online' },
+  { id: '89260932', revision: 'R2', order: 2, group: '一、选择题', stem: '已知 a 的算术平方根是 12.3，x 的算术平方根是 1.23，则 x 和 a 的关系是（ ）。', type: '单选题', difficulty: '较易', sourceModule: '模块1686167', origin: 'source', status: 'online' },
+  { id: '89270799', revision: 'R1', order: 3, group: '一、选择题', stem: '下列说法中，正确的是（ ）。', type: '单选题', difficulty: '较易', sourceModule: '模块1686167', origin: 'source', status: 'offline' },
+  { id: '89260933', revision: 'R2', order: 4, group: '二、填空题', stem: '算术平方根等于它本身的数是____，平方等于它本身的数是____。', type: '填空题', difficulty: '容易', sourceModule: '模块1686168', origin: 'source', status: 'online' },
+  { id: '90551021', revision: 'R1', order: 5, group: '二、填空题', stem: '若 √x = 5，则 x 的值为____。', type: '填空题', difficulty: '基础', sourceModule: '人工补题', origin: 'manual', status: 'online' },
+  { id: '89298141', revision: 'R1', order: 6, group: '三、解答题', stem: '结合数轴说明算术平方根的取值范围，并完成相应计算。', type: '解答题', difficulty: '中等', sourceModule: '模块1686169', origin: 'source', status: 'online' },
 ]
 
 export const versions: VersionRecord[] = [

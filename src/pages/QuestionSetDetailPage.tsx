@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MetisButton, MetisEmpty, MetisInput, MetisMessage, MetisSelect, MetisTable, MetisTabs, MetisTag } from '@yuanfudao/metis-web-component'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ContentStatusTag, LinkedCategoryTags, MethodLabel } from '../components/StatusTags'
 import { detailQuestions, generationJobs } from '../data/mockData'
-import type { CatalogBinding, GenerationJob, QuestionSet } from '../features/question-sets/types'
+import type { CatalogBinding, GenerationJob, QuestionSet, QuestionStatus } from '../features/question-sets/types'
 import { summarizeQuestionSetBindings } from '../services/catalogBindingRepository'
 import { questionSetRepository } from '../services/questionSetRepository'
 
@@ -16,6 +16,17 @@ export function QuestionSetDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('content')
   const [selectedQuestionId, setSelectedQuestionId] = useState(detailQuestions[0].id)
+  const [questionIdDraft, setQuestionIdDraft] = useState('')
+  const [questionStatusDraft, setQuestionStatusDraft] = useState<'all' | QuestionStatus>('all')
+  const [questionFilters, setQuestionFilters] = useState<{ questionIds: string; status: 'all' | QuestionStatus }>({ questionIds: '', status: 'all' })
+
+  const filteredQuestions = useMemo(() => {
+    const ids = questionFilters.questionIds.split(/\s+/).map((value) => value.trim()).filter(Boolean)
+    return detailQuestions.filter((item) => (
+      (!ids.length || ids.includes(item.id))
+      && (questionFilters.status === 'all' || item.status === questionFilters.status)
+    ))
+  }, [questionFilters])
 
   useEffect(() => {
     setLoading(true)
@@ -30,6 +41,12 @@ export function QuestionSetDetailPage() {
     const requestedTab = searchParams.get('tab')
     if (requestedTab === 'operations' || requestedTab === 'production') setActiveTab(requestedTab)
   }, [searchParams])
+
+  useEffect(() => {
+    if (filteredQuestions.length && !filteredQuestions.some((item) => item.id === selectedQuestionId)) {
+      setSelectedQuestionId(filteredQuestions[0].id)
+    }
+  }, [filteredQuestions, selectedQuestionId])
 
   if (loading) return <div className="page-container"><div className="loading-card">正在加载题单…</div></div>
   if (!record) return <div className="page-container"><div className="feedback-state"><MetisEmpty description="未找到该题单" /><MetisButton onClick={() => navigate('/assets')}>返回题单库</MetisButton></div></div>
@@ -51,11 +68,11 @@ export function QuestionSetDetailPage() {
     <div className="question-management-layout">
       <div className="question-management-left">
         <div className="question-module-toolbar"><span>模块设置：</span><MetisSelect value="group" disabled options={[{ label: '有模块', value: 'group' }]} /></div>
-        <aside className="question-order-panel"><header><strong>排序/分值</strong><div><button type="button">导出</button><button type="button" onClick={() => MetisMessage.info('打开关联题目弹窗')}>＋新建模块</button></div></header>{questionGroups.map((group) => <section key={group} className="question-order-group"><header><strong>▾　{group}</strong><button type="button" onClick={() => MetisMessage.info(`向${group}关联题目`)}>＋关联题目</button></header>{detailQuestions.filter((item) => item.group === group).map((item) => <button key={item.id} type="button" className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><span>{item.order}、{item.id}</span><MetisTag color={item.quality === 'warning' ? 'warning' : 'success'}>{item.quality === 'warning' ? '待检查' : '上线'}</MetisTag><small>0.00分</small><em>移出</em></button>)}</section>)}</aside>
+        <aside className="question-order-panel"><header><strong>排序</strong><div><button type="button">导出</button><button type="button" onClick={() => MetisMessage.info('打开关联题目弹窗')}>＋新建模块</button></div></header>{questionGroups.map((group) => <section key={group} className="question-order-group"><header><strong>▾　{group}</strong><button type="button" onClick={() => MetisMessage.info(`向${group}关联题目`)}>＋关联题目</button></header>{detailQuestions.filter((item) => item.group === group).map((item) => <button key={item.id} type="button" className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><span>{item.order}、{item.id}</span><MetisTag color={item.status === 'online' ? 'success' : 'default'}>{item.status === 'online' ? '上线' : '下线'}</MetisTag><em>移出</em></button>)}</section>)}</aside>
       </div>
       <div className="question-management-right">
-        <div className="question-management-filters"><span>题目ID：</span><MetisInput placeholder="请输入ID，多个换行分割" /><span>题目生产状态：</span><MetisSelect value="all" options={[{ label: '全部', value: 'all' }, { label: '上线', value: 'online' }]} /><MetisButton type="primary">查询</MetisButton><MetisButton>重置</MetisButton></div>
-        <section className="question-card-list">{detailQuestions.map((item) => <article key={item.id} className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><header><button className="table-link table-link-title" type="button">{item.id}</button><MetisTag color="success">上线</MetisTag><strong>{item.type}</strong><span>来源：{item.origin === 'source' ? '练习册' : '人工添加'}</span><span>题目版本：{item.revision}</span></header><div className="question-card-meta"><span>出处：{item.sourceModule}</span><span>难度：{item.difficulty}</span><span>题目分层：{item.group}</span></div><div className="question-card-tags"><MetisTag>有解析</MetisTag><MetisTag>有答案</MetisTag><MetisTag>有难度</MetisTag><MetisTag>有学科题型</MetisTag></div><p><strong>{item.order}.</strong> {item.stem}</p></article>)}</section>
+        <div className="question-management-filters"><span>题目ID：</span><MetisInput value={questionIdDraft} placeholder="请输入ID，多个换行分割" onChange={(event) => setQuestionIdDraft(event.target.value)} /><span>题目状态：</span><MetisSelect value={questionStatusDraft} options={[{ label: '全部', value: 'all' }, { label: '上线', value: 'online' }, { label: '下线', value: 'offline' }]} onChange={(value) => setQuestionStatusDraft(value as 'all' | QuestionStatus)} /><MetisButton type="primary" onClick={() => setQuestionFilters({ questionIds: questionIdDraft.trim(), status: questionStatusDraft })}>查询</MetisButton><MetisButton onClick={() => { setQuestionIdDraft(''); setQuestionStatusDraft('all'); setQuestionFilters({ questionIds: '', status: 'all' }) }}>重置</MetisButton></div>
+        <section className="question-card-list">{filteredQuestions.length ? filteredQuestions.map((item) => <article key={item.id} className={selectedQuestionId === item.id ? 'active' : ''} onClick={() => setSelectedQuestionId(item.id)}><header><button className="table-link table-link-title" type="button">{item.id}</button><MetisTag color={item.status === 'online' ? 'success' : 'default'}>{item.status === 'online' ? '上线' : '下线'}</MetisTag><strong>{item.type}</strong><span>来源：{item.origin === 'source' ? '练习册' : '人工添加'}</span><span>题目版本：{item.revision}</span></header><div className="question-card-meta"><span>出处：{item.sourceModule}</span><span>难度：{item.difficulty}</span><span>题目分层：{item.group}</span></div><div className="question-card-tags"><MetisTag>有解析</MetisTag><MetisTag>有答案</MetisTag><MetisTag>有难度</MetisTag><MetisTag>有学科题型</MetisTag></div><p><strong>{item.order}.</strong> {item.stem}</p></article>) : <MetisEmpty description="暂无符合条件的题目" />}</section>
       </div>
     </div>
   </div>

@@ -6,6 +6,7 @@ export type SyncStatus = 'synced' | 'changed' | 'conflict' | 'locked' | 'invalid
 export type BindingStatus = 'bound' | 'unbound'
 export type SyncPolicy = 'merge' | 'follow' | 'lock'
 export type CatalogTreeType = '同步练习树' | '专题树'
+export type QuestionStatus = 'online' | 'offline'
 
 export interface TeachingScope {
   phase: string
@@ -71,7 +72,7 @@ export interface QuestionItem {
   difficulty: string
   sourceModule: string
   origin: 'source' | 'manual'
-  quality: 'passed' | 'warning' | 'blocked'
+  status: QuestionStatus
 }
 
 export interface VersionRecord {
