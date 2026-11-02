@@ -92,7 +92,7 @@ export function QuestionSetListPage() {
         <div>
           <span className="breadcrumb">内容库 / 题单库</span>
           <h1>题单库</h1>
-          <p>统一管理同步练习与专题题单；生成记录与规则作为题单库的辅助能力。</p>
+          <p>统一管理同步练习与专题题单。</p>
         </div>
         <div className="heading-actions">
           <MetisButton onClick={() => MetisMessage.info('打开纯人工组题流程')}>新建题单</MetisButton>

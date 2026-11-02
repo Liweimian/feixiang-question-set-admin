@@ -2,6 +2,7 @@ import type { PropsWithChildren } from 'react'
 import { useMemo, useState } from 'react'
 import { MetisButton } from '@yuanfudao/metis-web-component'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { RequirementGuide } from './RequirementGuide'
 
 const navItems: Array<{ path?: string; label: string }> = [
   { path: '/catalogs', label: '教材目录' },
@@ -76,7 +77,10 @@ export function AdminShell({ children }: PropsWithChildren) {
           <span>培训考试</span>
           <span>资源库管理</span>
         </nav>
-        <div className="account-meta">内容运营 · 王晓慧</div>
+        <div className="header-utilities">
+          <RequirementGuide />
+          <div className="account-meta">内容运营 · 王晓慧</div>
+        </div>
       </header>
 
       {libraryMenuOpen && <button className="library-menu-backdrop" type="button" aria-label="关闭内容库菜单" onClick={() => setLibraryMenuOpen(false)} />}

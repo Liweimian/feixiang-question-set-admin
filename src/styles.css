@@ -51,7 +51,11 @@ button:focus-visible { outline: 2px solid var(--fx_admin_brand); outline-offset:
 .library-dropdown-scroll > button:hover { background: rgba(255,255,255,.08); color: #fff; }
 .library-dropdown-scroll > button.active { background: var(--fx_admin_brand); color: #fff; font-weight: 650; }
 .library-menu-backdrop { position: fixed; inset: 64px 0 0; z-index: 70; border: 0; background: rgba(7,25,43,.08); cursor: default; }
-.account-meta { margin-left: auto; color: var(--fx_admin_nav_text); font-size: 13px; }
+.header-utilities { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+.account-meta { color: var(--fx_admin_nav_text); font-size: 13px; white-space: nowrap; }
+.requirement-guide-entry button { border: 1px solid rgba(255,255,255,.18) !important; background: transparent !important; color: #fff !important; }
+.requirement-guide-entry button span { color: inherit !important; }
+.requirement-guide-entry button:hover { border-color: rgba(255,255,255,.32) !important; background: rgba(255,255,255,.1) !important; }
 
 .workspace-shell { display: grid; grid-template-columns: minmax(0, 1fr); min-height: calc(100vh - 64px); }
 .admin-app.is-review .workspace-shell { grid-template-columns: minmax(0, 1fr) 330px; }
@@ -110,6 +114,14 @@ button:focus-visible { outline: 2px solid var(--fx_admin_brand); outline-offset:
 .review-placeholder { position: sticky; top: 64px; height: calc(100vh - 64px); display: flex; flex-direction: column; justify-content: space-between; padding: 20px; border-left: 1px solid var(--fx_admin_border); background: #fff; }
 .review-placeholder strong { font-size: 16px; }
 .review-placeholder p { color: var(--fx_admin_text_secondary); font-size: 12px; line-height: 1.6; }
+
+/* 页面需求说明 */
+.requirement-guide-content { max-height: 66vh; overflow-y: auto; padding: 2px 4px 8px; }
+.requirement-guide-note { margin: 0 0 18px; padding: 11px 14px; border-radius: 8px; background: var(--fx_admin_surface_soft); color: var(--fx_admin_text_secondary); font-size: 12px; line-height: 1.65; }
+.requirement-guide-content section + section { margin-top: 22px; }
+.requirement-guide-content h3 { margin: 0 0 9px; font-size: 15px; line-height: 24px; }
+.requirement-guide-content ul { display: grid; gap: 7px; margin: 0; padding-left: 20px; }
+.requirement-guide-content li { color: var(--fx_admin_text_secondary); font-size: 13px; line-height: 1.75; }
 
 /* 生成向导 */
 .dialog-footer-actions { display: flex; justify-content: flex-end; gap: 8px; }
