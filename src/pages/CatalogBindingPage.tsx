@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
   MetisAlert,
@@ -12,7 +13,14 @@ import {
 } from '@yuanfudao/metis-web-component'
 import { questionSets } from '../data/mockData'
 import { LinkedCategoryTags } from '../components/StatusTags'
-import type { CatalogBinding, QuestionSet } from '../features/question-sets/types'
+import type {
+  BindingStatus,
+  CatalogBinding,
+  CatalogTreeType,
+  ContentStatus,
+  QuestionSet,
+  QuestionSetFilters,
+} from '../features/question-sets/types'
 import { catalogBindingRepository, summarizeQuestionSetBindings } from '../services/catalogBindingRepository'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -21,6 +29,26 @@ interface CatalogBindingPageProps {
 }
 
 type RelationTab = 'knowledge' | 'paper' | 'questionSet' | 'question'
+
+type QuestionSetPickerFilters = Pick<QuestionSetFilters,
+  | 'id'
+  | 'title'
+  | 'questionId'
+  | 'linkedTreeType'
+  | 'grade'
+  | 'academicYear'
+  | 'semester'
+  | 'textbook'
+  | 'workbookId'
+  | 'contentStatus'
+  | 'bindingStatus'
+>
+
+const initialQuestionSetPickerFilters: QuestionSetPickerFilters = {}
+
+function PickerFilterField({ label, children }: { label: string; children: ReactNode }) {
+  return <label className="filter-field"><span>{label}</span><div>{children}</div></label>
+}
 
 interface DirectoryNode {
   id: string
@@ -84,7 +112,9 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const [relationTab, setRelationTab] = useState<RelationTab>(isTextbook ? 'knowledge' : 'questionSet')
   const [topicPanel, setTopicPanel] = useState<'sets' | 'history'>('sets')
   const [questionSetDialogOpen, setQuestionSetDialogOpen] = useState(false)
-  const [questionSetKeyword, setQuestionSetKeyword] = useState('')
+  const [pickerFiltersExpanded, setPickerFiltersExpanded] = useState(true)
+  const [pickerDraftFilters, setPickerDraftFilters] = useState<QuestionSetPickerFilters>(initialQuestionSetPickerFilters)
+  const [pickerAppliedFilters, setPickerAppliedFilters] = useState<QuestionSetPickerFilters>(initialQuestionSetPickerFilters)
   const [boundRows, setBoundRows] = useState(() => catalogBindingRepository.list())
 
   useEffect(() => {
@@ -93,6 +123,10 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
       : isTextbook ? 'TC-310418' : 'TOPIC-2201')
     setRelationTab(isTextbook ? 'knowledge' : 'questionSet')
     setTopicPanel('sets')
+    setQuestionSetDialogOpen(false)
+    setPickerFiltersExpanded(true)
+    setPickerDraftFilters(initialQuestionSetPickerFilters)
+    setPickerAppliedFilters(initialQuestionSetPickerFilters)
     setBoundRows(catalogBindingRepository.list())
   }, [isTextbook, nodes, requestedNode])
 
@@ -100,9 +134,24 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const expectedTreeType = isTextbook ? '同步练习树' : '专题树'
   const bindings = boundRows.filter((binding) => binding.treeType === expectedTreeType && binding.nodeId === selectedNode)
   const selectableSets = useMemo(() => questionSets.filter((item) => {
-    const keyword = questionSetKeyword.trim().toLowerCase()
-    return !keyword || item.id.toLowerCase().includes(keyword) || item.title.toLowerCase().includes(keyword) || item.source.chapterPath.toLowerCase().includes(keyword)
-  }), [questionSetKeyword])
+    const summary = summarizeQuestionSetBindings(boundRows, item.id)
+    const ids = pickerAppliedFilters.id?.split(/\s+/).map((value) => value.trim().toLowerCase()).filter(Boolean) ?? []
+    const semester = item.scope.semester ?? (item.scope.volume ? item.scope.volume.replace('册', '学期') : undefined)
+    return (!ids.length || ids.some((id) => item.id.toLowerCase().includes(id)))
+      && (!pickerAppliedFilters.title || item.title.toLowerCase().includes(pickerAppliedFilters.title.trim().toLowerCase()))
+      && (!pickerAppliedFilters.questionId || item.questionIds?.some((id) => id.includes(pickerAppliedFilters.questionId?.trim() ?? '')))
+      && (!pickerAppliedFilters.linkedTreeType || summary.linkedCategories.includes(pickerAppliedFilters.linkedTreeType))
+      && (!pickerAppliedFilters.grade || item.scope.grade === pickerAppliedFilters.grade)
+      && (!pickerAppliedFilters.academicYear || item.scope.academicYear === pickerAppliedFilters.academicYear)
+      && (!pickerAppliedFilters.semester || semester === pickerAppliedFilters.semester)
+      && (!pickerAppliedFilters.textbook || item.scope.textbook?.includes(pickerAppliedFilters.textbook))
+      && (!pickerAppliedFilters.workbookId || item.source.workbookId?.includes(pickerAppliedFilters.workbookId.trim()))
+      && (!pickerAppliedFilters.contentStatus || item.contentStatus === pickerAppliedFilters.contentStatus)
+      && (!pickerAppliedFilters.bindingStatus || summary.bindingStatus === pickerAppliedFilters.bindingStatus)
+  }), [boundRows, pickerAppliedFilters])
+  const updatePickerDraftFilters = (patch: Partial<QuestionSetPickerFilters>) => {
+    setPickerDraftFilters((current) => ({ ...current, ...patch }))
+  }
   const removeBinding = (id: string) => {
     catalogBindingRepository.remove(id)
     setBoundRows(catalogBindingRepository.list())
@@ -162,10 +211,29 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
     } },
   ]
 
-  const questionSetLibraryDialog = <MetisDialog title={`关联题单 · ${currentNode.label}`} open={questionSetDialogOpen} width={1120} footer={null} onCancel={() => setQuestionSetDialogOpen(false)}>
+  const questionSetLibraryDialog = <MetisDialog title={`关联题单 · ${currentNode.label}`} open={questionSetDialogOpen} width={1240} footer={null} onCancel={() => setQuestionSetDialogOpen(false)}>
     <div className="question-set-picker">
       <MetisAlert type="info" showIcon message="题单可关联多个目录" description="已关联其他教材章节或专题节点的题单仍可继续关联；只有当前节点已关联时不可重复。" />
-      <div className="question-set-picker-toolbar"><div><strong>题单库</strong><span>共 {selectableSets.length} 条题单</span></div><MetisInput value={questionSetKeyword} onChange={(event) => setQuestionSetKeyword(event.target.value)} placeholder="搜索题单ID、名称或来源章节" /></div>
+      <section className="question-set-picker-filter-card" aria-label="关联题单筛选">
+        <div className="filter-card-heading"><strong>筛选题单</strong><MetisButton type="borderless" onClick={() => setPickerFiltersExpanded((value) => !value)}>{pickerFiltersExpanded ? '收起筛选' : '展开筛选'}</MetisButton></div>
+        {pickerFiltersExpanded && <>
+          <div className="filter-form-grid">
+            <PickerFilterField label="题单ID"><MetisInput.TextArea autoSize={{ minRows: 1, maxRows: 3 }} value={pickerDraftFilters.id} placeholder="多个ID可分行输入" onChange={(event) => updatePickerDraftFilters({ id: event.target.value })} /></PickerFilterField>
+            <PickerFilterField label="名称"><MetisInput value={pickerDraftFilters.title} placeholder="请输入题单名称" onChange={(event) => updatePickerDraftFilters({ title: event.target.value })} /></PickerFilterField>
+            <PickerFilterField label="题目ID"><MetisInput value={pickerDraftFilters.questionId} placeholder="请输入题目ID" onChange={(event) => updatePickerDraftFilters({ questionId: event.target.value })} /></PickerFilterField>
+            <PickerFilterField label="已关联分类"><MetisSelect allowClear value={pickerDraftFilters.linkedTreeType} placeholder="全部分类" options={[{ label: '同步练习树', value: '同步练习树' }, { label: '专题树', value: '专题树' }]} onChange={(value) => updatePickerDraftFilters({ linkedTreeType: value as CatalogTreeType | undefined })} /></PickerFilterField>
+            <PickerFilterField label="年级"><MetisSelect allowClear value={pickerDraftFilters.grade} placeholder="全部年级" options={[{ label: '七年级', value: '七年级' }, { label: '八年级', value: '八年级' }, { label: '九年级', value: '九年级' }]} onChange={(value) => updatePickerDraftFilters({ grade: value ? String(value) : undefined })} /></PickerFilterField>
+            <PickerFilterField label="学年"><MetisSelect allowClear value={pickerDraftFilters.academicYear} placeholder="全部学年" options={[{ label: '2026-2027学年', value: '2026-2027学年' }, { label: '2025-2026学年', value: '2025-2026学年' }, { label: '2024-2025学年', value: '2024-2025学年' }]} onChange={(value) => updatePickerDraftFilters({ academicYear: value ? String(value) : undefined })} /></PickerFilterField>
+            <PickerFilterField label="学期"><MetisSelect allowClear value={pickerDraftFilters.semester} placeholder="全部学期" options={[{ label: '上学期', value: '上学期' }, { label: '下学期', value: '下学期' }]} onChange={(value) => updatePickerDraftFilters({ semester: value ? String(value) : undefined })} /></PickerFilterField>
+            <PickerFilterField label="教材版本"><MetisSelect allowClear value={pickerDraftFilters.textbook} placeholder="全部教材版本" options={[{ label: '沪教版(五四制)', value: '沪教版' }, { label: '统编版', value: '统编版' }, { label: '多版本/通用', value: '多版本' }]} onChange={(value) => updatePickerDraftFilters({ textbook: value ? String(value) : undefined })} /></PickerFilterField>
+            <PickerFilterField label="来源练习册ID"><MetisInput value={pickerDraftFilters.workbookId} placeholder="请输入练习册ID" onChange={(event) => updatePickerDraftFilters({ workbookId: event.target.value })} /></PickerFilterField>
+            <PickerFilterField label="状态"><MetisSelect allowClear value={pickerDraftFilters.contentStatus} placeholder="全部状态" options={[{ label: '草稿', value: 'draft' }, { label: '已上线', value: 'published' }, { label: '已下线', value: 'offline' }]} onChange={(value) => updatePickerDraftFilters({ contentStatus: value as ContentStatus | undefined })} /></PickerFilterField>
+            <PickerFilterField label="目录关联"><MetisSelect allowClear value={pickerDraftFilters.bindingStatus} placeholder="全部关联状态" options={[{ label: '已关联', value: 'bound' }, { label: '未关联', value: 'unbound' }]} onChange={(value) => updatePickerDraftFilters({ bindingStatus: value as BindingStatus | undefined })} /></PickerFilterField>
+          </div>
+          <div className="filter-actions"><MetisButton onClick={() => { setPickerDraftFilters(initialQuestionSetPickerFilters); setPickerAppliedFilters(initialQuestionSetPickerFilters) }}>重置</MetisButton><MetisButton type="primary" onClick={() => setPickerAppliedFilters({ ...pickerDraftFilters })}>搜索</MetisButton></div>
+        </>}
+      </section>
+      <div className="question-set-picker-toolbar"><div><strong>题单列表</strong><span>当前筛选共 {selectableSets.length} 条</span></div></div>
       <MetisTable<QuestionSet> rowKey="id" columns={libraryColumns} dataSource={selectableSets} pagination={{ pageSize: 6 }} />
     </div>
   </MetisDialog>
