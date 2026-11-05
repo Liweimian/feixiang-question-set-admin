@@ -38,6 +38,9 @@ export const catalogBindingRepository = {
   remove(id: string) {
     bindings = bindings.filter((item) => item.id !== id)
   },
+  replaceForQuestionSet(setId: string, nextBindings: CatalogBinding[]) {
+    bindings = [...bindings.filter((item) => item.setId !== setId), ...nextBindings.map((item) => ({ ...item }))]
+  },
   getByQuestionSet(setId: string) {
     return bindings.filter((item) => item.setId === setId && item.status !== '失效').map((item) => ({ ...item }))
   },

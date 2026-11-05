@@ -135,9 +135,11 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
   const bindings = boundRows.filter((binding) => binding.treeType === expectedTreeType && binding.nodeId === selectedNode)
   const selectableSets = useMemo(() => questionSets.filter((item) => {
     const summary = summarizeQuestionSetBindings(boundRows, item.id)
+    const alreadyBoundCurrentNode = summary.bindings.some((binding) => binding.treeType === expectedTreeType && binding.nodeId === currentNode.id)
     const ids = pickerAppliedFilters.id?.split(/\s+/).map((value) => value.trim().toLowerCase()).filter(Boolean) ?? []
     const semester = item.scope.semester ?? (item.scope.volume ? item.scope.volume.replace('册', '学期') : undefined)
-    return (!ids.length || ids.some((id) => item.id.toLowerCase().includes(id)))
+    return !alreadyBoundCurrentNode
+      && (!ids.length || ids.some((id) => item.id.toLowerCase().includes(id)))
       && (!pickerAppliedFilters.title || item.title.toLowerCase().includes(pickerAppliedFilters.title.trim().toLowerCase()))
       && (!pickerAppliedFilters.questionId || item.questionIds?.some((id) => id.includes(pickerAppliedFilters.questionId?.trim() ?? '')))
       && (!pickerAppliedFilters.linkedTreeType || summary.linkedCategories.includes(pickerAppliedFilters.linkedTreeType))
@@ -148,7 +150,7 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
       && (!pickerAppliedFilters.workbookId || item.source.workbookId?.includes(pickerAppliedFilters.workbookId.trim()))
       && (!pickerAppliedFilters.contentStatus || item.contentStatus === pickerAppliedFilters.contentStatus)
       && (!pickerAppliedFilters.bindingStatus || summary.bindingStatus === pickerAppliedFilters.bindingStatus)
-  }), [boundRows, pickerAppliedFilters])
+  }), [boundRows, currentNode.id, expectedTreeType, pickerAppliedFilters])
   const updatePickerDraftFilters = (patch: Partial<QuestionSetPickerFilters>) => {
     setPickerDraftFilters((current) => ({ ...current, ...patch }))
   }
@@ -199,21 +201,19 @@ export function CatalogBindingPage({ mode }: CatalogBindingPageProps) {
     { title: '状态', key: 'status', width: 100, render: (_: unknown, item: QuestionSet) => <MetisTag color={item.contentStatus === 'published' ? 'success' : 'warning'}>{item.contentStatus === 'published' ? '已上线' : '未上线'}</MetisTag> },
     { title: '操作', key: 'actions', width: 110, render: (_: unknown, item: QuestionSet) => {
       const summary = summarizeQuestionSetBindings(boundRows, item.id)
-      const alreadyBoundCurrentNode = summary.bindings.some((binding) => binding.treeType === expectedTreeType && binding.nodeId === currentNode.id)
-      const hasOtherBindings = summary.bindings.length > 0
-      return <MetisButton type="primary" disabled={alreadyBoundCurrentNode} onClick={() => {
+      return <MetisButton type="primary" onClick={() => {
         const next: CatalogBinding = { id: `BIND-${Date.now()}`, treeType: expectedTreeType, nodePath: currentNode.label, nodeId: currentNode.id, setTitle: item.title, setId: item.id, primary: !summary.bindings.some((binding) => binding.treeType === expectedTreeType), region: '全国', status: '待生效', operator: '王晓慧', updatedAt: '刚刚' }
         catalogBindingRepository.add(next)
         setBoundRows(catalogBindingRepository.list())
         setQuestionSetDialogOpen(false)
         MetisMessage.success(`已将 ${item.id} 关联到 ${currentNode.label}`)
-      }}>{alreadyBoundCurrentNode ? '当前节点已关联' : hasOtherBindings ? '继续关联' : '关联'}</MetisButton>
+      }}>关联</MetisButton>
     } },
   ]
 
   const questionSetLibraryDialog = <MetisDialog title={`关联题单 · ${currentNode.label}`} open={questionSetDialogOpen} width={1240} footer={null} onCancel={() => setQuestionSetDialogOpen(false)}>
     <div className="question-set-picker">
-      <MetisAlert type="info" showIcon message="题单可关联多个目录" description="已关联其他教材章节或专题节点的题单仍可继续关联；只有当前节点已关联时不可重复。" />
+      <MetisAlert type="info" showIcon message="题单可关联多个目录" description="列表不展示已关联当前节点的题单；已关联其他教材章节或专题节点的题单仍可关联。" />
       <section className="question-set-picker-filter-card" aria-label="关联题单筛选">
         <div className="filter-card-heading"><strong>筛选题单</strong><MetisButton type="borderless" onClick={() => setPickerFiltersExpanded((value) => !value)}>{pickerFiltersExpanded ? '收起筛选' : '展开筛选'}</MetisButton></div>
         {pickerFiltersExpanded && <>

@@ -81,8 +81,8 @@ export function QuestionSetListPage() {
     { title: '创建时间', dataIndex: 'updatedAt', key: 'createdAt', width: 160 },
     { title: '创建人', dataIndex: 'owner', key: 'creator', width: 100 },
     {
-      title: '操作', key: 'actions', fixed: 'right' as const, width: 310,
-      render: (_: unknown, item: QuestionSetListItem) => <div className="table-actions"><MetisButton type="borderless" onClick={() => { const nextStatus = item.contentStatus === 'published' ? 'offline' : 'published'; setResult((current) => ({ ...current, items: current.items.map((row) => row.id === item.id ? { ...row, contentStatus: nextStatus } : row) })); MetisMessage.success(item.contentStatus === 'published' ? '题单已下线' : '题单已上线') }}>状态控制</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}?tab=operations`)}>操作记录</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}?tab=production`)}>生产记录</MetisButton><MetisButton type="borderless" onClick={() => { setResult((current) => ({ ...current, total: Math.max(0, current.total - 1), items: current.items.filter((row) => row.id !== item.id) })); MetisMessage.success(`已删除题单 ${item.id}`) }}>删除</MetisButton></div>,
+      title: '操作', key: 'actions', fixed: 'right' as const, width: 240,
+      render: (_: unknown, item: QuestionSetListItem) => <div className="table-actions"><MetisButton type="borderless" onClick={() => { const nextStatus = item.contentStatus === 'published' ? 'offline' : 'published'; setResult((current) => ({ ...current, items: current.items.map((row) => row.id === item.id ? { ...row, contentStatus: nextStatus } : row) })); MetisMessage.success(item.contentStatus === 'published' ? '题单已下线' : '题单已上线') }}>状态控制</MetisButton><MetisButton type="borderless" onClick={() => navigate(`/assets/${item.id}?tab=operations`)}>操作记录</MetisButton><MetisButton type="borderless" onClick={() => { setResult((current) => ({ ...current, total: Math.max(0, current.total - 1), items: current.items.filter((row) => row.id !== item.id) })); MetisMessage.success(`已删除题单 ${item.id}`) }}>删除</MetisButton></div>,
     },
   ], [navigate])
 
