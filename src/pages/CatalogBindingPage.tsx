@@ -44,7 +44,7 @@ type QuestionSetPickerFilters = Pick<QuestionSetFilters,
   | 'bindingStatus'
 >
 
-const initialQuestionSetPickerFilters: QuestionSetPickerFilters = {}
+const initialQuestionSetPickerFilters: QuestionSetPickerFilters = { contentStatus: 'published' }
 
 function PickerFilterField({ label, children }: { label: string; children: ReactNode }) {
   return <label className="filter-field"><span>{label}</span><div>{children}</div></label>
